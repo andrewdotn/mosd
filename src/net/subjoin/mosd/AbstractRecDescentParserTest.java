@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 public class AbstractRecDescentParserTest {
 	
-	public static class ParenParser
+	static class ParenParser
 	extends AbstractRecDescentParser
 	{
 		private int _maxDepth, _minDepth;
