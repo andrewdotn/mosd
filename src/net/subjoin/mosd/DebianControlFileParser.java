@@ -21,7 +21,7 @@ implements Iterable<DebianControlFile>
 	public DebianControlFile controlFile() {
 	    DebianControlFile r = new DebianControlFile();
 	    
-	    while (!lookahead('\n')) {
+	    while (!eof() && !lookahead('\n')) {
 		String keyword = keyword();
 		
 		match(':');
@@ -33,10 +33,10 @@ implements Iterable<DebianControlFile>
 		}
 		    
 		String description = description();
-		System.out.println("got " + keyword + ", " + description);
 		r.add(keyword, description);
 	    }
-	    match('\n');
+	    if (!eof())
+		match('\n');
 	    return r;
 	}
 	

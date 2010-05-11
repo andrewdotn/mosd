@@ -1,13 +1,18 @@
 package net.subjoin.mosd;
 
+import java.io.IOException;
+
 public class Main {
 	
-	public static void main(String[] args) {
-		UbuntuDistribution ub = new UbuntuDistribution(args[0]);
+	public static void main(String[] args)
+	throws IOException
+	{
+		UbuntuDistribution ub = new UbuntuDistribution(args[0], args[1]);
+		ub.load();
 		
 		System.out.println("The distribution at " + ub.getPath());
 		
-		System.out.println(" has source package metadata files at:");	
+		System.out.println("has source package metadata files at:");	
 		for (Object o: ub.getSourcePackageMetadataFiles())
 			System.out.println("\t" + o);
 

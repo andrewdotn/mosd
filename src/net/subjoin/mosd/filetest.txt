@@ -1,0 +1,24 @@
+Test: Format1
+MD5Sum:
+ 713dfddfee9007985ac8f299b60b5967          8292584 main/binary-amd64/Packages
+ 158e04dbf181bc2ff7e08172b2e1ad94               95 main/binary-amd64/Release
+SHA1:
+ fffa098afbf0f57a32c78c359082cee48f9817bf          8292584 main/binary-amd64/Packages
+ 5cf81491f9c31c296259a729b72b260edd0ef4ae               95 main/binary-amd64/Release
+SHA256:
+ e5b40c6ab312e710a61b90824911eabdc83af0a15da0f13d65f58b7934baaca8          8292584 main/binary-amd64/Packages
+ faf438a8b7bc4da55f8edf3a1916f3c6745714d8b096f5d7fbb0a3fd9667d574               95 main/binary-amd64/Release
+
+Test: Format2
+Directory: foo
+Files:
+ 799f31c1757e124cad481c2b1a7fcadd 1195 aalib_1.4p5-38.dsc
+ 9801095c42bba12edebd1902bcf0a990 391028 aalib_1.4p5.orig.tar.gz
+ 027af9632713e8e1d1c7ea71b030b6fb 13404 aalib_1.4p5-38.diff.gz
+Homepage: http://aa-project.sourceforge.net/aalib/
+Checksums-Sha1:
+ a23269e950a249d2ef93625837cace45ddbce03b 391028 aalib_1.4p5.orig.tar.gz
+ fcfd00044bf5db0a44fa876519c93a284617f070 13404 aalib_1.4p5-38.diff.gz
+Checksums-Sha256:
+ fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee 391028 aalib_1.4p5.orig.tar.gz
+ 2635fe3df21c97b5b9b863f5ce1350022e0bae7e5705c5b2b1499cc4858f19a7 13404 aalib_1.4p5-38.diff.gz
