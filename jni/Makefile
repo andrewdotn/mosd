@@ -2,13 +2,19 @@ SHELL = /bin/bash -eu
 
 CFLAGS = -W -Wall -Wextra -Wformat=2 -MD \
 	 -I/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Headers \
-	 -I/opt/local/include
+	 -I/opt/local/include \
+	 -g3 -O3
 LDFLAGS = -L/opt/local/lib -lmagic -larchive
+
+SRCS = \
+       arinspect.c \
+       net_subjoin_mosd_ArchiveInspector.c \
+       net_subjoin_mosd_JNITest.c \
+
 
 all: libmosd.jnilib mosd_jni.jar
 
-libmosd.jnilib: net_subjoin_mosd_JNITest.o arinspect.o \
-    net_subjoin_mosd_ArchiveInspector.o
+libmosd.jnilib: ${SRCS:%.c=%.o}
 	gcc ${CFLAGS} -shared $^ -o $@ ${LDFLAGS}
 
 net_subjoin_mosd_ArchiveInspector.c: net_subjoin_mosd_ArchiveInspector.h
@@ -26,4 +32,4 @@ library location to in Eclipse.' > mosd_jni.txt
 clean:
 	rm -f *.d *.jnilib *.o
 
--include mosd.d
+-include ${SRCS:%.c=%.d}

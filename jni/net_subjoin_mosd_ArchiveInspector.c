@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -7,6 +8,38 @@
 #define UNUSED __attribute__((unused))
 
 #define FILE_DISTRIBUTION_CLASS "Lnet/subjoin/mosd/DistributionFile;"
+
+typedef struct {
+    JNIEnv *jenv;
+    int failed;
+} closure_t;
+
+static void raise_exception_with_message(JNIEnv *jenv,
+    const char* className, const char* message)
+{
+    jclass cls = (*jenv)->FindClass(jenv, className);
+    if (!cls) {
+        cls = (*jenv)->FindClass(jenv, "Ljava/lang/ClassNotFoundException;");
+    }
+    (*jenv)->ThrowNew(jenv, cls, message);
+}
+
+static void raise_exception(int archive_errno,
+    const char* error_string, void* v_closure)
+{
+    closure_t* closure = (closure_t*)v_closure;
+    closure->failed = 1;
+
+    const char* exceptionClassName;
+    if (archive_errno == ENOENT) {
+        exceptionClassName = "Ljava/io/FileNotFoundException;";
+    } else {
+        exceptionClassName = "Lnet/subjoin/mosd/ArchiveInspectorException;";
+    }
+    raise_exception_with_message(closure->jenv,
+        exceptionClassName,
+        error_string);
+}
 
 /*
  * Class:     net_subjoin_mosd_ArchiveInspector
@@ -18,10 +51,15 @@ JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
 {
     arinspect_entry_t *first_entry, *entry;
 
-    const jbyte* path_string = (*jenv)->GetStringUTFChars(jenv,
+    closure_t closure = { jenv, 0 };
+    const char* path_string = (*jenv)->GetStringUTFChars(jenv,
         jPath, NULL);
-    first_entry = arinspect_entries(path_string);
+    first_entry = arinspect_entries(path_string,
+        raise_exception, (void*)&closure);
     (*jenv)->ReleaseStringUTFChars(jenv, jPath, path_string);
+
+    if (closure.failed)
+        return NULL;
 
     int entry_count = 0;
     entry = first_entry;

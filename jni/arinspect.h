@@ -11,7 +11,13 @@ typedef struct _arinspect_entry {
     struct _arinspect_entry* next;
 } arinspect_entry_t;
 
-arinspect_entry_t* arinspect_entries(const char* filename);
+typedef void arinspect_error_handler_t(int archive_errno,
+    const char* error_string, void* closure);
+
+/* If an error occurs, error_handler is called and NULL is returned.
+ * If error_handler is NULL, the error is printed to stderr. */
+arinspect_entry_t* arinspect_entries(const char* filename,
+        arinspect_error_handler_t foo, void* closure_for_error_handler);
 void arinspect_free_list(arinspect_entry_t*);
 
 #endif

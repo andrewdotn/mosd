@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import org.junit.Test;
 
@@ -25,8 +22,8 @@ public class UtilTest {
     {
         final String testString = "Hello, world!\n";
 
-        runWithTempFileContaining(testString,
-            new TempFileUsingRunnable() {
+        Util.runWithTempFileContaining(testString,
+            new Util.TempFileUsingRunnable() {
                 public void run(File tmpFile) throws IOException {
                     assertEquals(testString, Util.fileToStringMaybeGz(tmpFile));
                 }
@@ -40,8 +37,8 @@ public class UtilTest {
         /* Make sure we exceed the buffer size of the reader method */
         assertTrue(testString2.length() >  0x100000);
 
-        runWithTempFileContaining(testString2,
-            new TempFileUsingRunnable() {
+        Util.runWithTempFileContaining(testString2,
+            new Util.TempFileUsingRunnable() {
                 public void run(File tmpFile) throws IOException {
                     assertEquals(testString2, Util.fileToStringMaybeGz(tmpFile));
                 }
@@ -58,70 +55,26 @@ public class UtilTest {
             -89, 85, 123, 14, 0, 0, 0
         };
 
-        runWithTempFileContaining(gzippedTestBytes, ".gz",
-            new TempFileUsingRunnable() {
+        Util.runWithTempFileContaining(gzippedTestBytes, ".gz",
+            new Util.TempFileUsingRunnable() {
                 public void run(File tmpFile) throws IOException {
                     assertEquals(testString, Util.fileToStringMaybeGz(tmpFile));
                 }
             });
     }
-
-    private void runWithTempFileContaining(String string,
-        TempFileUsingRunnable r)
+    
+    public @Test void testCrazyBufferCopyRoutine()
     throws IOException
     {
-        runWithTempFileContaining(string, null, r);
-    }
-
-    private void runWithTempFileContaining(String string, String suffix,
-        TempFileUsingRunnable r)
-    throws IOException
-    {
-        File tmpFile = null;
-        try {
-            tmpFile = File.createTempFile(UtilTest.class.getCanonicalName(),
-                suffix);
-
-            FileWriter writer = new FileWriter(tmpFile);
-            try {
-                writer.append(string);
-            } finally {
-                writer.close();
-            }
-
-            r.run(tmpFile);
-
-        } finally {
-            if (tmpFile != null)
-                tmpFile.delete();
-        }		
-    }
-
-    public static void runWithTempFileContaining(byte[] bytes, String suffix,
-        TempFileUsingRunnable r)
-    throws IOException
-    {
-        File tmpFile = null;
-        try {
-            tmpFile = File.createTempFile(UtilTest.class.getCanonicalName(),
-                suffix);
-
-            OutputStream out = new FileOutputStream(tmpFile);
-            try {
-                out.write(bytes);
-            } finally {
-                out.close();
-            }
-
-            r.run(tmpFile);
-
-        } finally {
-            if (tmpFile != null)
-                tmpFile.delete();
-        }
-    }
-
-    public static interface TempFileUsingRunnable {
-        void run(File file) throws IOException;
+	final long length = Util.stringResource(UtilTest.class,
+		"test-archive-corrupt.tar").length();
+	
+	Util.runWithTempFileContainingResource(UtilTest.class,
+		"test-archive-corrupt.tar", ".tar",
+		new Util.TempFileUsingRunnable() {
+		    public void run(File file) throws IOException {
+			assertEquals(length, file.length());
+		    }
+		});
     }
 }

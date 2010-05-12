@@ -7,6 +7,7 @@ public class ArchiveInspector {
     
     private ArchiveInspector() {};
 
-    public static native DistributionFile[] getContents(String path);
+    public static native DistributionFile[] getContents(String path)
+    throws ArchiveInspectorException;
     
 }

@@ -1,3 +1,5 @@
+#include <err.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,13 +36,31 @@ arinspect_entry_t* new_entry(arinspect_entry_t* old)
     return r;
 }
 
-arinspect_entry_t*
-arinspect_handle_error() {
+static arinspect_entry_t*
+call_error_handler(
+    struct archive *a,
+    arinspect_error_handler_t error_handler,
+    const char* filename, void* closure_for_error_handler)
+{
+    int ar_errno = archive_errno(a);
+    const char* message = archive_error_string(a);
+    if (error_handler) {
+        error_handler(ar_errno, message, closure_for_error_handler);
+    } else {
+        /* The ENOENT error message includes the file name. */
+        if (ar_errno != ENOENT)
+            warnx("%s: %s", filename, message);
+        else
+            warnx("%s", message);
+    }
     return NULL;
 }
 
 arinspect_entry_t*
-arinspect_entries(const char* filename) {
+arinspect_entries(const char* filename,
+    arinspect_error_handler_t error_handler,
+    void* closure_for_error_handler)
+{
     struct archive *a;
     struct archive_entry *a_entry;
     arinspect_entry_t *entry, *first_entry;
@@ -56,14 +76,15 @@ arinspect_entries(const char* filename) {
     archive_read_support_format_all(a);
     r = archive_read_open_filename(a, filename, 4096);
     if (r != ARCHIVE_OK)
-        return arinspect_handle_error();
+        return call_error_handler(a, error_handler,
+            filename, closure_for_error_handler);
 
     entry = NULL;
     first_entry = NULL;
     while (r = archive_read_next_header(a, &a_entry), r != ARCHIVE_EOF) {
         if (r != ARCHIVE_OK) {
-           fprintf(stderr, "%s\n", archive_error_string(a));
-            return arinspect_handle_error();
+           return call_error_handler(a, error_handler,
+               filename, closure_for_error_handler);
         }
 
         if (archive_entry_filetype(a_entry) != AE_IFREG)
@@ -77,6 +98,8 @@ arinspect_entries(const char* filename) {
         entry->size = archive_entry_size(a_entry);
         entry->modtime = archive_entry_mtime(a_entry);
 
+        archive_read_data_skip(a);
+
 #if 0
         int size = archive_read_data(a, buf, MAGIC_BUFFER_SIZE);
         entry->file_type = strdup(magic_buffer(magic_cookie, buf, size));
@@ -84,7 +107,8 @@ arinspect_entries(const char* filename) {
     }
     r = archive_read_finish(a);
     if (r != ARCHIVE_OK)
-        return arinspect_handle_error();
+        return call_error_handler(a, error_handler,
+            filename, closure_for_error_handler);
 
     return first_entry;
 }
