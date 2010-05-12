@@ -1,13 +1,16 @@
 package net.subjoin.mosd;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 	
 	public static void main(String[] args)
 	throws IOException
 	{
-		UbuntuDistribution ub = new UbuntuDistribution(args[0], args[1]);
+		UbuntuDistribution ub = new UbuntuDistribution("ubuntu", "karmic");
 		ub.load();
 		
 		System.out.println("The distribution at " + ub.getPath());
@@ -31,9 +34,35 @@ public class Main {
 		}
 		System.out.println("totalling " + totalBytes + " bytes.");
 		
-		SourcePackage sp = ub.getSourcePackages().get(0);
-		System.out.println("The first one is " + sp.getName());
-		System.out.println("It’s first file is " + sp.getFiles().get(0));
+
+		{
+		    SourcePackage sp = ub.getSourcePackages().get(0);
+		    List<DistributionFile> files = sp.getFiles();
+		    for (DistributionFile df: files) {
+			System.out.print("It has file " + df.getFile());
+			if (df.getFile().exists()) {
+			    System.out.println(" which has files " + 
+				    Arrays.toString(ArchiveInspector.getContents(
+					    df.getFile().getPath())));
+			} else {
+			    System.out.println(" .. which we don’t have a copy of.");
+			}
+		    }
+		}
+		
+		totalBytes = 0;
+		int i = 0;
+		NumberFormat nf = NumberFormat.getInstance();
+		for (SourcePackage sp: ub.getSourcePackages()) {
+		    for (DistributionFile f: sp.getFiles())
+			for (DistributionFile sf: ArchiveInspector.getContents(f.getFile().getPath()))
+			    totalBytes += sf.getSize();
+		    System.out.format("%s %d/%d, %s bytes\n",
+			    sp.getName(), i + 1, ub.getSourcePackages().size(),
+			    nf.format(totalBytes));
+		    i++;
+		}
+
 	
 		/*
 		System.out.println("and "
