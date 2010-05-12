@@ -7,9 +7,11 @@ LDFLAGS = -L/opt/local/lib -lmagic -larchive
 
 all: libmosd.jnilib mosd_jni.jar
 
-libmosd.jnilib: net_subjoin_mosd_JNITest.o arinspect.o
-	gcc ${CFLAGS} -shared $< -o $@
+libmosd.jnilib: net_subjoin_mosd_JNITest.o arinspect.o \
+    net_subjoin_mosd_ArchiveInspector.o
+	gcc ${CFLAGS} -shared $^ -o $@ ${LDFLAGS}
 
+net_subjoin_mosd_ArchiveInspector.c: net_subjoin_mosd_ArchiveInspector.h
 net_subjoin_mosd_JNITest.c: net_subjoin_mosd_JNITest.h
 
 mosd_jni.jar:

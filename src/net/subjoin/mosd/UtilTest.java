@@ -97,7 +97,7 @@ public class UtilTest {
         }		
     }
 
-    private void runWithTempFileContaining(byte[] bytes, String suffix,
+    public static void runWithTempFileContaining(byte[] bytes, String suffix,
         TempFileUsingRunnable r)
     throws IOException
     {
@@ -121,7 +121,7 @@ public class UtilTest {
         }
     }
 
-    private interface TempFileUsingRunnable {
+    public static interface TempFileUsingRunnable {
         void run(File file) throws IOException;
     }
 }

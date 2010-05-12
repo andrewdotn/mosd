@@ -1,7 +1,6 @@
 package net.subjoin.mosd;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 public class Main {
 	
