@@ -16,9 +16,9 @@ Files:
  9801095c42bba12edebd1902bcf0a990 391028 aalib_1.4p5.orig.tar.gz
  027af9632713e8e1d1c7ea71b030b6fb 13404 aalib_1.4p5-38.diff.gz
 Homepage: http://aa-project.sourceforge.net/aalib/
-Checksums-Sha1:
+Checksums-Sha1: 
  a23269e950a249d2ef93625837cace45ddbce03b 391028 aalib_1.4p5.orig.tar.gz
  fcfd00044bf5db0a44fa876519c93a284617f070 13404 aalib_1.4p5-38.diff.gz
-Checksums-Sha256:
+Checksums-Sha256: 
  fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee 391028 aalib_1.4p5.orig.tar.gz
  2635fe3df21c97b5b9b863f5ce1350022e0bae7e5705c5b2b1499cc4858f19a7 13404 aalib_1.4p5-38.diff.gz

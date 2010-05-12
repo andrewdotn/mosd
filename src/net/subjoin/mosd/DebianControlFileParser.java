@@ -27,7 +27,7 @@ implements Iterable<DebianControlFile>
 		match(':');
 		if (lookahead(' '))
 		    match(' ');
-		else {
+		if (lookahead('\n')) {
 		    match('\n');
 		    match(' ');
 		}

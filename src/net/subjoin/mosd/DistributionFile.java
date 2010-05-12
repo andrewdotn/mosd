@@ -7,14 +7,14 @@ import java.io.File;
  * Anything that you would find on a mirror site. 
  */
 public class DistributionFile {
-    String _base;
+    File _base;
     String _path;
     long _size;
     
     public DistributionFile(String base, String path, long size)
     {
-	_base = base;
-	_path = path;
+	_base = null;
+	_path = new File(base, path).getPath();
 	_size = size;
     }
     
@@ -30,8 +30,15 @@ public class DistributionFile {
 	return getFile().getParentFile();
     }
     
-    public long size() {
+    public void setBase(File base) {
+	_base = base;
+    }
+    
+    public long getSize() {
 	return _size;
     }
-
+    
+    public @Override String toString() {
+	return getFile().getPath() + " [" + getSize() + "]";
+    }
 }

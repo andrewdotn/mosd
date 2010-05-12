@@ -83,7 +83,7 @@ public class AbstractRecDescentParserTest {
 			};
 		} catch (ParseException e) {
 			exceptionRaised = true;
-			assertEquals(e.getMessage(), "Asked to match Ô1Õ at char 4: 111[ERROR->21");
+			assertEquals(e.getMessage(), "Asked to match â€˜1â€™ at char 4: 111[ERROR->21");
 		}
 		assertTrue(exceptionRaised);
 	}

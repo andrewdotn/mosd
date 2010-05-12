@@ -82,5 +82,19 @@ public class DebianControlFile {
     private boolean isFileKey(String key) {
 	return HASH_KEYS.containsKey(key);
     }
+
+    public String getKey(String string) {
+	for (int i = 0; i < _keys.size(); i++)
+	    if (string.equals(_keys.get(i)))
+		return _values.get(i);
+	return null;
+    }
+    
+    public @Override String toString() {
+	StringBuilder sb = new StringBuilder();
+	for (int i = 0; i < _keys.size(); i++)
+	    sb.append(_keys.get(i) + ": " + _values.get(i) + "\n");
+	return sb.toString();
+    }
     
 }

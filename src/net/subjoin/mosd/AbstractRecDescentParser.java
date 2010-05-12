@@ -42,7 +42,7 @@ public abstract class AbstractRecDescentParser {
 		if (lookahead() == c)
 			_index += 1;
 		else
-			raiseSyntaxException("Asked to match Ô" + c + "Õ");
+			raiseSyntaxException("Asked to match â€˜" + c + "â€™");
 	}
 	
 	private void raiseSyntaxException(String msg) {
