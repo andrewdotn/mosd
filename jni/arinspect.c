@@ -35,6 +35,11 @@ arinspect_entry_t* new_entry(arinspect_entry_t* old)
 }
 
 arinspect_entry_t*
+arinspect_handle_error() {
+    return NULL;
+}
+
+arinspect_entry_t*
 arinspect_entries(const char* filename) {
     struct archive *a;
     struct archive_entry *a_entry;
@@ -51,14 +56,14 @@ arinspect_entries(const char* filename) {
     archive_read_support_format_all(a);
     r = archive_read_open_filename(a, filename, 4096);
     if (r != ARCHIVE_OK)
-        exit(1);
+        return arinspect_handle_error();
 
     entry = NULL;
     first_entry = NULL;
     while (r = archive_read_next_header(a, &a_entry), r != ARCHIVE_EOF) {
         if (r != ARCHIVE_OK) {
            fprintf(stderr, "%s\n", archive_error_string(a));
-           exit(1);
+            return arinspect_handle_error();
         }
 
         if (archive_entry_filetype(a_entry) != AE_IFREG)
@@ -79,7 +84,7 @@ arinspect_entries(const char* filename) {
     }
     r = archive_read_finish(a);
     if (r != ARCHIVE_OK)
-        exit(1);
+        return arinspect_handle_error();
 
     return first_entry;
 }

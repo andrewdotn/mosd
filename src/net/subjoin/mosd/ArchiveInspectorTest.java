@@ -3,6 +3,7 @@ package net.subjoin.mosd;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -26,14 +27,27 @@ public class ArchiveInspectorTest {
 		    public void run(File tempFile) throws IOException {
 			DistributionFile[] contents
 				= ArchiveInspector.getContents(tempFile.getPath());
-			System.err.println(Arrays.toString(contents));
 			assertEquals(3, contents.length);
 			assertEquals("test-archive/foo.txt",
 				contents[0].getFile().getPath());
 		    }
 		});
     
-	ArchiveInspector.getContents("foo");
+    }
+    
+    public @Test(expected=FileNotFoundException.class)
+    void testNonExistentFile()
+    throws IOException
+    {
+	File f = null;
+	try {
+	    f = File.createTempFile("nonexistent", null);
+	    f.delete();
+	    ArchiveInspector.getContents(f.getPath());
+	} finally {
+	    if (f != null)
+		f.delete();
+	}
     }
     
     public static void main(String[] args)
