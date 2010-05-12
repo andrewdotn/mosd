@@ -22,6 +22,10 @@ public class ArchiveInspectorTest {
 			assertEquals(3, contents.length);
 			assertEquals("test-archive/foo.txt",
 				contents[0].getFile().getPath());
+			assertTrue(contents[1].containsOtherFiles());
+			assertEquals("qux/bar.txt",
+				contents[1].getContainedFiles().get(0)
+					.getFile().getPath());
 		    }
 		});
     
@@ -84,6 +88,7 @@ public class ArchiveInspectorTest {
     public static void main(String[] args)
     throws IOException
     {
+	new ArchiveInspectorTest().testBasics();
 	for (String s: args)
 	    System.out.println(Arrays.toString(ArchiveInspector.getContents(s)));
     }

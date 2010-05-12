@@ -5,25 +5,22 @@
 
 #include <archive.h>
 #include <archive_Entry.h>
-#include <magic.h>
 
 #include "arinspect.h"
 
-#define MAGIC_BUFFER_SIZE 4096
+#define READ_BUFFER_SIZE 4096
 
 void arinspect_free_list(arinspect_entry_t* entry) {
     arinspect_entry_t* next;
     while (entry != NULL) {
         free(entry->pathname);
         free(entry->file_type);
+        arinspect_free_list(entry->children);
         next = entry->next;
         free(entry);
         entry = next;
     }
 }
-
-static magic_t magic_cookie = NULL;
-char buf[MAGIC_BUFFER_SIZE];
 
 arinspect_entry_t* new_entry(arinspect_entry_t* old)
 {
@@ -31,12 +28,24 @@ arinspect_entry_t* new_entry(arinspect_entry_t* old)
         = (arinspect_entry_t*)malloc(sizeof(arinspect_entry_t));
     r->next = NULL;
     r->file_type = NULL;
+    r->children = NULL;
+    r->parent = NULL;
     if (old != NULL)
         old->next = r;
     return r;
 }
 
-static arinspect_entry_t*
+static int shouldLookInside(const char* pathname) {
+    const char* lastDot = strrchr(pathname, '.');
+    if (!lastDot)
+        return 0;
+    const char* extension = lastDot;
+    if (!strcmp(extension, ".lzma"))
+        return 1;
+    return 0;
+}
+
+static void
 call_error_handler(
     struct archive *a,
     arinspect_error_handler_t error_handler,
@@ -53,11 +62,12 @@ call_error_handler(
         else
             warnx("%s", message);
     }
-    return NULL;
 }
 
-arinspect_entry_t*
-arinspect_entries(const char* filename,
+static
+int
+arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
+    arinspect_entry_t** entries,
     arinspect_error_handler_t error_handler,
     void* closure_for_error_handler)
 {
@@ -66,25 +76,33 @@ arinspect_entries(const char* filename,
     arinspect_entry_t *entry, *first_entry;
     int r;
 
-    if (magic_cookie == NULL) {
-        magic_cookie = magic_open(MAGIC_COMPRESS);
-        magic_load(magic_cookie, NULL);
-    }
-
     a = archive_read_new();
     archive_read_support_compression_all(a);
     archive_read_support_format_all(a);
-    r = archive_read_open_filename(a, filename, 4096);
-    if (r != ARCHIVE_OK)
-        return call_error_handler(a, error_handler,
-            filename, closure_for_error_handler);
+
+    if (filename) {
+        r = archive_read_open_filename(a, filename, READ_BUFFER_SIZE);
+        if (r != ARCHIVE_OK) {
+            call_error_handler(a, error_handler,
+                filename, closure_for_error_handler);
+            return ARINSPECT_ERROR;
+        }
+    } else {
+        r = archive_read_open_memory(a, buffer, bufsize);
+        if (r != ARCHIVE_OK) {
+            call_error_handler(a, error_handler,
+                filename, closure_for_error_handler);
+            return ARINSPECT_ERROR;
+        }
+    }
 
     entry = NULL;
     first_entry = NULL;
     while (r = archive_read_next_header(a, &a_entry), r != ARCHIVE_EOF) {
         if (r != ARCHIVE_OK) {
-           return call_error_handler(a, error_handler,
-               filename, closure_for_error_handler);
+            call_error_handler(a, error_handler,
+                filename, closure_for_error_handler);
+            return ARINSPECT_ERROR;
         }
 
         if (archive_entry_filetype(a_entry) != AE_IFREG)
@@ -98,17 +116,58 @@ arinspect_entries(const char* filename,
         entry->size = archive_entry_size(a_entry);
         entry->modtime = archive_entry_mtime(a_entry);
 
-        archive_read_data_skip(a);
+        if (shouldLookInside(entry->pathname)) {
+            char buf[100];
+            buffer = malloc(entry->size);
+            if (!buffer) {
+                sprintf(buf, "Failed to allocated %lld bytes",
+                    entry->size);
+                archive_set_error(a, ENOMEM, buf);
+                call_error_handler(a, error_handler,
+                    filename, closure_for_error_handler);
+                return ARINSPECT_ERROR;
+            }
+            int64_t readBytes = archive_read_data(a, buffer, entry->size);
+            if (readBytes != entry->size) {
+                sprintf(buf,
+                    "archive_read_data returned %lld bytes (%lld expected)",
+                    readBytes, entry->size);
+                archive_set_error(a, EIO, buf);
+                call_error_handler(a, error_handler,
+                    filename, closure_for_error_handler);
+                return ARINSPECT_ERROR;
+            }
+            arinspect_entry_t *child_entries;
+            r = arinspect_entries1(NULL, buffer, entry->size, &child_entries,
+                error_handler, closure_for_error_handler);
+            if (r != ARINSPECT_OK)
+                return r;
 
-#if 0
-        int size = archive_read_data(a, buf, MAGIC_BUFFER_SIZE);
-        entry->file_type = strdup(magic_buffer(magic_cookie, buf, size));
-#endif
+            entry->children = child_entries;
+        }
+
+        archive_read_data_skip(a);
     }
     r = archive_read_finish(a);
-    if (r != ARCHIVE_OK)
-        return call_error_handler(a, error_handler,
+    if (r != ARCHIVE_OK) {
+        call_error_handler(a, error_handler,
             filename, closure_for_error_handler);
+        return ARINSPECT_ERROR;
+    }
 
-    return first_entry;
+    *entries = first_entry;
+    return ARINSPECT_OK;
+}
+
+arinspect_entry_t*
+arinspect_entries(const char* filename,
+    arinspect_error_handler_t error_handler,
+    void* closure_for_error_handler)
+{
+    arinspect_entry_t* entry = NULL;
+    int r = arinspect_entries1(filename, NULL, 0,
+        &entry, error_handler, closure_for_error_handler);
+    if (r == ARINSPECT_OK)
+        return entry;
+    return NULL;
 }
