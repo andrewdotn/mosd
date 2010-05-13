@@ -51,15 +51,22 @@ public class Util {
 	public static String getTestFileAsString(String path)
 	{
 	    try {
-		return stringFromStream(Util.class.getResourceAsStream(path));
+		return stringFromStream(
+			new FileInputStream(loadTestFile(path).getFile()));
 	    } catch (IOException e) {
 		throw new RuntimeException(e);
 	    }
 	}
 	
 	public static TestFile loadTestFile(String path) {
+	    File classFile = new File(
+		    Util.class.getResource("Util.class").getPath());
+	    int ndots = Util.class.getName().split("\\.").length;
+	    for (int i = 0; i < ndots + 1; i++) {
+		classFile = classFile.getParentFile();
+	    }
 	    return new TestFile(
-		    new File(Util.class.getResource(path).getPath()));
+		    new File(classFile.getPath() + "/testdata/" + path));
 	}
 	
 	public static TestFile createTempFile()
