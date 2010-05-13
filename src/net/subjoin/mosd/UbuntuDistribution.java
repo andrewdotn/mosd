@@ -14,20 +14,22 @@ public class UbuntuDistribution {
 	private List<DistributionFile> _binaryPackageMetadataFiles;
 	private List<SourcePackage> _sourcePackages;
 	
-	public UbuntuDistribution(String path, String releaseName) {
+	public UbuntuDistribution(String path, String releaseName)
+	throws IOException
+	{
 		_path = new File(path);
 		_releaseName = releaseName;
 		_sourcePackageMetadataFiles
 			= new ArrayList<DistributionFile>();
 		_binaryPackageMetadataFiles
 			= new ArrayList<DistributionFile>();
+		
+		parseReleaseFile();
 	}
 
 	public File getPath() {
 		return _path;
 	}
-	
-	
 	
 	private void parseReleaseFile()
 	throws IOException
@@ -54,12 +56,6 @@ public class UbuntuDistribution {
 	    return _sourcePackageMetadataFiles;
 	}
 	
-	public void load()
-	throws IOException
-	{
-	    parseReleaseFile();
-	}
-
 	public Collection<DistributionFile> getBinaryPackageMetadataFiles() {
 	    return _binaryPackageMetadataFiles;
 	}

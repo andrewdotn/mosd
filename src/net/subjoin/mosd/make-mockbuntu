@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -eu
+
+filesize() {
+        if ! [ -f "${1}" ]; then
+            exit 1
+        fi
+        perl -e 'print -s "'"${1}"'"'
+}
+
+size_and_basename() {
+    echo "$(filesize "${1}")" "$(basename -- "${1}")"
+}
+
+# Our mock ubuntu distribution has
+
+mkdir mockbuntu
+cd mockbuntu
+mkdir pool
+cd pool
+
+# aprog: a dozen C files and a dozen python files
+# libbar: a dozen C files
+
+mkdir aprog
+cd aprog
+mkdir aprog-1.1
+cd aprog-1.1
+for ((i = 0; i < 12; i++)); do
+    echo -n '1234567890' > $(printf %02d $i).c
+done
+cd ..
+tar jcf aprog-1.1.tbz2 aprog-1.1
+rm -rf aprog-1.1
+cd ..
+
+mkdir libbar
+cd libbar
+mkdir libbar-2.1
+cd libbar-2.1
+for ((i = 0; i < 12; i++)); do
+    echo -n '1234567890' > $(printf %02d $i).py
+done
+mkdir src
+cd src
+for ((i = 0; i < 6; i++)); do
+    echo -n '1234567890' > $(printf %02d $i).c
+done
+mkdir b
+cd b
+for ((i = 6; i < 12; i++)); do
+    echo -n '1234567890' > $(printf %02d $i).c
+done
+cd ..
+zip -qr b.zip b
+rm -rf b
+cd ..
+tar cf src.tar src
+lzma src.tar
+mv src.tar.lzma src.lzma
+rm -rf src
+cd ..
+tar zcf libbar-2.1.tar.gz libbar-2.1
+rm -rf libbar-2.1
+cd ..
+
+cd ..
+mkdir dists
+cd dists
+mkdir tasty
+cd tasty
+mkdir comp1
+echo "Package: aprog
+Directory: pool/aprog
+Files:
+ xxx $(size_and_basename ../../pool/aprog/aprog-1.1.tbz2)
+
+Package: libbar
+Directory: pool/libbar
+Files:
+ xxx $(size_and_basename ../../pool/libbar/libbar-2.1.tar.gz)
+" | gzip -c > comp1/Sources.gz
+echo "MD5Sum:
+ xxx $(filesize comp1/Sources.gz) comp1/Sources.gz
+" > Release

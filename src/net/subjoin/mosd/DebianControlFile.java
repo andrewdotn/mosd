@@ -2,11 +2,12 @@ package net.subjoin.mosd;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.google.common.collect.ImmutableMap;
 
 public class DebianControlFile {
     
@@ -66,18 +67,15 @@ public class DebianControlFile {
 	return ret;
     }
     
-    private static final Map<String, String> HASH_KEYS;
-    static {
-	HashMap<String, String> hash = new HashMap<String, String>();
-	hash.put("Files", "MD5");
-	hash.put("MD5", "MD5");
-	hash.put("SHA1", "SHA1");
-	hash.put("SHA256", "SHA256");
-	hash.put("Checksums-Md5", "MD5");
-	hash.put("Checksums-Sha1", "SHA1");
-	hash.put("Checksums-Sha256", "SHA256");
-	HASH_KEYS = Collections.unmodifiableMap(hash); 
-    }
+    private static final Map<String, String> HASH_KEYS
+    	= ImmutableMap.<String, String>builder()
+        	.put("Files", "MD5")
+        	.put("MD5Sum", "MD5")
+        	.put("SHA1", "SHA1")
+        	.put("SHA256", "SHA256")
+        	.put("Checksums-Md5", "MD5")
+        	.put("Checksums-Sha1", "SHA1")
+        	.put("Checksums-Sha256", "SHA256").build();
     
     private boolean isFileKey(String key) {
 	return HASH_KEYS.containsKey(key);
