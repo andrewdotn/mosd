@@ -1,5 +1,6 @@
 package net.subjoin.mosd;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,7 +12,8 @@ public class SourcePackage {
     private int _uncompressedFileCount;
     private long _uncompressedBytes;
     
-    SourcePackage(DebianControlFile dsc) {
+    SourcePackage(DebianControlFile dsc)
+    {
 	_name = dsc.getKey("Package");
 	_files = dsc.getFiles();
 	_walked = false;
@@ -34,12 +36,20 @@ public class SourcePackage {
     private void walk() {
 	final int[] count = new int[1];
 	final long[] size = new long[1];
-	for (DistributionFile df: getFiles())
+	for (DistributionFile df: getFiles()) {
+	    File f = new File(df.getPath());
+	    if (!f.exists()) {
+		if (f.getName().endsWith(".dsc")
+			|| f.getName().endsWith(".diff.gz"))
+		    continue;
+		throw new RuntimeException("missing file " + f);
+	    }
 	    try {
 		walk(ArchiveInspector.getContents(df.getPath()), count, size);
 	    } catch (ArchiveInspectorException e) {
-		throw new RuntimeException(e);
+		throw new RuntimeException("trying to open " + f, e);
 	    }
+	}
 	_uncompressedFileCount = count[0];
 	_uncompressedBytes = size[0];
 	_walked = true;

@@ -15,6 +15,7 @@ size_and_basename() {
 
 # Our mock ubuntu distribution has
 
+rm -rf mockbuntu
 mkdir mockbuntu
 cd mockbuntu
 mkdir pool
@@ -75,6 +76,7 @@ echo "Package: aprog
 Directory: pool/aprog
 Files:
  xxx $(size_and_basename ../../pool/aprog/aprog-1.1.tbz2)
+ yyy 404 noexist.dsc
 
 Package: libbar
 Directory: pool/libbar

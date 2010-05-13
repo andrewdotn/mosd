@@ -98,5 +98,18 @@ void testCorruptArchive()
 	assertTrue(shouldLookInside("foo.tar.bz2"));
     }
 
-
+    public @Test void testUsefulErrorMessage() {
+	TestFile file = Util.loadTestFile("test-corrupt-inside.tar.gz");
+	boolean thrown = false;
+	try {
+	    ArchiveInspector.getContents(file.getPath());
+	} catch (ArchiveInspectorException e) {
+	    assertTrue(e.getMessage().contains("innocuous"));
+	    assertTrue(e.getMessage().contains("b.zip"));
+	    thrown = true;
+	} finally {
+	    file.close();
+	}
+	assertTrue(thrown);
+    }
 }

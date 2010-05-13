@@ -51,14 +51,16 @@ public class Main {
 		}
 		
 		totalBytes = 0;
+		long totalFiles = 0;
 		int i = 0;
 		NumberFormat nf = NumberFormat.getInstance();
 		for (SourcePackage sp: ub.getSourcePackages()) {
-		    for (DistributionFile f: sp.getFiles())
-			for (DistributionFile sf: ArchiveInspector.getContents(f.getPath()))
-			    totalBytes += sf.getSize();
-		    System.out.format("%s %d/%d, %s bytes\n",
+		    totalBytes += sp.getUncompressedBytes();
+		    totalFiles += sp.getUncompressedFileCount();
+		    
+		    System.out.format("%s %d/%d, %s files, %s bytes\n",
 			    sp.getName(), i + 1, ub.getSourcePackages().size(),
+			    nf.format(totalFiles),
 			    nf.format(totalBytes));
 		    i++;
 		}

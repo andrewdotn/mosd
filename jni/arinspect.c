@@ -72,10 +72,12 @@ call_error_handler(
     arinspect_error_handler_t error_handler,
     const char* filename, void* closure_for_error_handler)
 {
-    int ar_errno = archive_errno(a);
+    char buf[1000];
     const char* message = archive_error_string(a);
+    int ar_errno = archive_errno(a);
     if (error_handler) {
-        error_handler(ar_errno, message, closure_for_error_handler);
+        snprintf(buf, sizeof(buf)/sizeof(buf[0]), "%s: %s", filename, message);
+        error_handler(ar_errno, buf, closure_for_error_handler);
     } else {
         /* The ENOENT error message includes the file name. */
         if (ar_errno != ENOENT)
@@ -85,8 +87,11 @@ call_error_handler(
     }
 }
 
-static
-int
+/*
+ * Read the table of contents entries from the archive stored in buffer, or
+ * from filename if buffer is NULL.
+ */
+static int
 arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
     arinspect_entry_t** entries, arinspect_error_handler_t error_handler,
     void* closure_for_error_handler)
@@ -100,7 +105,7 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
     archive_read_support_compression_all(a);
     archive_read_support_format_all(a);
 
-    if (filename) {
+    if (!buffer) {
         r = archive_read_open_filename(a, filename, READ_BUFFER_SIZE);
         if (r != ARCHIVE_OK) {
             call_error_handler(a, error_handler,
@@ -158,8 +163,23 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
                 return ARINSPECT_ERROR;
             }
             arinspect_entry_t *child_entries;
-            r = arinspect_entries1(NULL, buffer, entry->size, &child_entries,
-                error_handler, closure_for_error_handler);
+
+            int filename_message_size = snprintf(NULL, 0, "%s inside %s",
+                archive_entry_pathname(a_entry), filename);
+            char* fnbuf = (char*)malloc(filename_message_size);
+            if (!fnbuf) {
+                sprintf(buf, "Failed to allocated %lld bytes",
+                    entry->size);
+                archive_set_error(a, ENOMEM, buf);
+                call_error_handler(a, error_handler,
+                    filename, closure_for_error_handler);
+                return ARINSPECT_ERROR;
+            }
+            snprintf(fnbuf, filename_message_size, "%s inside %s",
+                archive_entry_pathname(a_entry), filename);
+            r = arinspect_entries1(fnbuf, buffer, entry->size,
+                &child_entries, error_handler, closure_for_error_handler);
+            free(fnbuf);
             if (r != ARINSPECT_OK)
                 return r;
 
