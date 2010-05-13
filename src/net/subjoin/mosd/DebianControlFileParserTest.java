@@ -12,7 +12,7 @@ public class DebianControlFileParserTest {
     public @Test void testKeyValue()
     throws IOException
     {
-	String packages1 = Util.testFileAsString("package1.txt");
+	String packages1 = Util.getTestFileAsString("package1.txt");
 	DebianControlFileParser p = new DebianControlFileParser(packages1);
 	DebianControlFile dcs = p.controlFile();
 	
@@ -31,7 +31,7 @@ public class DebianControlFileParserTest {
     public @Test void testMultipleEntries()
     throws IOException
     {
-	String packages1 = Util.testFileAsString("packages1.txt");
+	String packages1 = Util.getTestFileAsString("packages1.txt");
 	DebianControlFileParser p = new DebianControlFileParser(packages1);
 	
 	int i = 0;

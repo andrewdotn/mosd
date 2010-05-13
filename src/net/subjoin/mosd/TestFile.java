@@ -10,9 +10,11 @@ import java.io.File;
 public class TestFile
 {
     private File _file;
+    private boolean _closed;
     
     public TestFile(File file) {
 	_file = file;
+	_closed = false;
     }
     
     public File getFile() {
@@ -24,6 +26,12 @@ public class TestFile
 	return _file.getPath();
     }
     
-    public void close() {
+    public final void close() {
+	if (_closed)
+	    throw new RuntimeException("TestFile double-close");
+	_closed = true;
+	closeOverride();
     }
+    
+    protected void closeOverride() { }
 }

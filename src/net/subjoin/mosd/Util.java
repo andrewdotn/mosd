@@ -48,7 +48,7 @@ public class Util {
 		}
 	}
 	
-	public static String testFileAsString(String path)
+	public static String getTestFileAsString(String path)
 	{
 	    try {
 		return stringFromStream(Util.class.getResourceAsStream(path));
@@ -57,40 +57,47 @@ public class Util {
 	    }
 	}
 	
-	public static TestFile testFile(String path) {
+	public static TestFile loadTestFile(String path) {
 	    return new TestFile(
 		    new File(Util.class.getResource(path).getPath()));
 	}
 	
-	public static TestFile tempFile()
+	public static TestFile createTempFile()
 	{
-	    return tempFile(null);
+	    return createTempFile(null);
 	}
 	
-	public static TestFile tempFile(String suffix)
+	public static TestFile createTempFile(String suffix)
 	{
-	    try {
-        	    final File tempFile = File.createTempFile(
-        		    Util.class.getPackage().getName(), suffix);
-        	    return new TestFile(tempFile) {
-        		
-        		public @Override void close() {
-        		    tempFile.delete();
-        		}
-        	    };
-	    } catch (IOException e) {
-		throw new RuntimeException(e);
-	    }        	    
+	    return createTempFileContaining("", suffix);
 	}
 
-	public static TestFile tempFileContaining(String string) {
+	public static TestFile createTempFileContaining(
+		String string, String suffix)
+	{
+	    final File tempFile;
 	    try {
-        	    TestFile file = tempFile();
-        	    FileOutputStream os = new FileOutputStream(file.getFile());
-        	    os.write(string.getBytes());
-        	    return file;
+        	    tempFile = File.createTempFile(
+        		    Util.class.getPackage().getName(), suffix);
 	    } catch (IOException e) {
 		throw new RuntimeException(e);
 	    }
+
+	    try {
+		if (string.length() > 0) {
+		    FileOutputStream os = new FileOutputStream(tempFile);
+		    os.write(string.getBytes());
+		    os.close();
+                }
+	    } catch (IOException e) {
+		tempFile.delete();
+		throw new RuntimeException(e);
+	    }
+        	    
+	    return new TestFile(tempFile) {
+		public @Override void closeOverride() {
+		    tempFile.delete();
+		}
+	    };
 	}
 }

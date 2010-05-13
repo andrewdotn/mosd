@@ -12,7 +12,7 @@ public class UtilTest {
     throws IOException
     {
         assertEquals("Hello, world!\nThis is a test.\n",
-            Util.testFileAsString("test.txt"));
+            Util.getTestFileAsString("test.txt"));
     }
 
     public @Test void testFileToString()
@@ -20,7 +20,7 @@ public class UtilTest {
     {
         final String testString = "Hello, world!\n";
         
-        TestFile testFile = Util.testFile("hello.txt");
+        TestFile testFile = Util.loadTestFile("hello.txt");
         try {
             assertEquals(testString, Util.fileToStringMaybeGz(testFile.getFile()));
         } finally {
@@ -35,14 +35,15 @@ public class UtilTest {
         /* Make sure we exceed the buffer size of the reader method */
         assertTrue(testString2.length() >  0x100000);
         
-        TestFile tmpFile = Util.tempFileContaining(testString2);
+        TestFile tmpFile = Util.createTempFileContaining(testString2, "");
         try {
             assertEquals(testString2, Util.fileToStringMaybeGz(tmpFile.getFile()));
         } finally {
-            testFile.close();
+            tmpFile.close();
         }
+        assertFalse(tmpFile.getFile().exists());
 
-        TestFile file = Util.testFile("hello.txt.gz");
+        TestFile file = Util.loadTestFile("hello.txt.gz");
         try {
             assertEquals(testString, Util.fileToStringMaybeGz(file.getFile()));
         } finally {

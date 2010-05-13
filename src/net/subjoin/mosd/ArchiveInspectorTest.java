@@ -12,7 +12,7 @@ public class ArchiveInspectorTest {
     public @Test void testBasics()
     throws IOException
     {
-        TestFile file = Util.testFile("test-archive.tar.gz");
+        TestFile file = Util.loadTestFile("test-archive.tar.gz");
         try {
             DistributionFile[] contents
                 = ArchiveInspector.getContents(file.getPath());
@@ -47,7 +47,7 @@ void testNonExistentFile()
 void testCorruptArchive()
     throws IOException
     {
-	TestFile file = Util.testFile("test-archive-corrupt.tar");
+	TestFile file = Util.loadTestFile("test-archive-corrupt.tar");
 	try {
 	    ArchiveInspector.getContents(file.getPath());
 	} finally {
@@ -59,7 +59,7 @@ void testCorruptArchive()
     void testCorruptArchive2()
     throws IOException
     {
-	TestFile file = Util.testFile("test-archive-corrupt.tar.gz");
+	TestFile file = Util.loadTestFile("test-archive-corrupt.tar.gz");
 	try {
 	    ArchiveInspector.getContents(file.getPath());
 	} finally {
@@ -71,7 +71,7 @@ void testCorruptArchive()
     void testNotAnArchive()
     throws IOException
     {
-	TestFile file = Util.testFile("not-really-a-tarball.tar.gz");
+	TestFile file = Util.loadTestFile("not-really-a-tarball.tar.gz");
 	try {
 	    ArchiveInspector.getContents(file.getPath());
 	} finally {
