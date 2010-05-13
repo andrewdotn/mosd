@@ -20,7 +20,7 @@ public class ArchiveInspectorTest {
             assertEquals("test-archive/foo.txt", contents[0].getPath());
             assertTrue(contents[1].containsOtherFiles());
             assertEquals("inside/baz.txt",
-                contents[1].getContainedFiles().get(0).getPath());
+                contents[1].getContainedFiles()[0].getPath());
             assertEquals("test-archive/qux/bar.txt",
                 contents[2].getPath());
         } finally {

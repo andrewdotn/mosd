@@ -26,6 +26,12 @@ public class SourcePackage {
     }
     
     public int getUncompressedFileCount() {
+	if (!_walked)
+	    walk();
+	return _uncompressedFileCount;
+    }
+    
+    private void walk() {
 	final int[] count = new int[1];
 	final long[] size = new long[1];
 	for (DistributionFile df: getFiles())
@@ -36,19 +42,24 @@ public class SourcePackage {
 	    }
 	_uncompressedFileCount = count[0];
 	_uncompressedBytes = size[0];
-	return _uncompressedFileCount;
+	_walked = true;
     }
     
     static void walk(DistributionFile[] dfs, int[] count, long[] size)
     {
 	for (DistributionFile f: dfs) {
-	    count[0]++;
-	    size[0] += f.getSize();
+	    if (f.containsOtherFiles())
+		walk(f.getContainedFiles(), count, size);
+	    else {
+		count[0]++;
+		size[0] += f.getSize();
+	    }
 	}
     }
     
-    public long getUncompressedSize() {
-	getUncompressedFileCount();
+    public long getUncompressedBytes() {
+	if (!_walked)
+	    walk();
 	return _uncompressedBytes;
     }
     

@@ -2,15 +2,12 @@ package net.subjoin.mosd;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A file distributed over the internet by an open-source operating system.
  * Anything that you would find on a mirror site. 
  */
 public class DistributionFile {
-    private File _base;
     private String _path;
     private long _size;
     private DistributionFile[] _containedFiles;
@@ -21,7 +18,6 @@ public class DistributionFile {
 
     public DistributionFile(String path, long size, DistributionFile[] containedFiles)
     {
-	_base = null;
 	_path = path;
 	_size = size;
 	_containedFiles = containedFiles;
@@ -53,8 +49,8 @@ public class DistributionFile {
 	return  _containedFiles.length > 0;
     }
     
-    public List<DistributionFile> getContainedFiles() {
-	return Collections.unmodifiableList(Arrays.asList(_containedFiles));
+    public DistributionFile[] getContainedFiles() {
+	return Arrays.copyOf(_containedFiles, _containedFiles.length);
     }
     
     public DistributionFile getEnclosingFile() {

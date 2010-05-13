@@ -35,12 +35,12 @@ public class UbuntuDistributionTest {
     
     public @Test void testFileSize() {
 	assertEquals(12, _aprog.getUncompressedFileCount());
-	assertEquals(120, _aprog.getUncompressedSize());
+	assertEquals(120, _aprog.getUncompressedBytes());
     }
     
     public @Test void testFileSizeWithRecursion() {
 	assertEquals(24, _libbar.getUncompressedFileCount());
-	assertEquals(240, _libbar.getUncompressedSize());
+	assertEquals(240, _libbar.getUncompressedBytes());
     }
     
     public @After void tearDown() {
