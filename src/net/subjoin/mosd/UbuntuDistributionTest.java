@@ -33,6 +33,16 @@ public class UbuntuDistributionTest {
 	assertEquals("libbar", _libbar.getName());
     }
     
+    public @Test void testFileSize() {
+	assertEquals(12, _aprog.getUncompressedFileCount());
+	assertEquals(120, _aprog.getUncompressedSize());
+    }
+    
+    public @Test void testFileSizeWithRecursion() {
+	assertEquals(24, _libbar.getUncompressedFileCount());
+	assertEquals(240, _libbar.getUncompressedSize());
+    }
+    
     public @After void tearDown() {
 	_basePath.close();
     }

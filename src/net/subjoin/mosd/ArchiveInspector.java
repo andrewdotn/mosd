@@ -9,5 +9,4 @@ public class ArchiveInspector {
 
     public static native DistributionFile[] getContents(String path)
     throws ArchiveInspectorException;
-    
 }

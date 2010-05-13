@@ -7,10 +7,14 @@ public class SourcePackage {
 
     private String _name;
     private List<DistributionFile> _files;
+    private boolean _walked;
+    private int _uncompressedFileCount;
+    private long _uncompressedBytes;
     
     SourcePackage(DebianControlFile dsc) {
 	_name = dsc.getKey("Package");
 	_files = dsc.getFiles();
+	_walked = false;
     }
     
     public List<DistributionFile> getFiles() {
@@ -19,6 +23,33 @@ public class SourcePackage {
     
     public String getName() {
 	return _name;
+    }
+    
+    public int getUncompressedFileCount() {
+	final int[] count = new int[1];
+	final long[] size = new long[1];
+	for (DistributionFile df: getFiles())
+	    try {
+		walk(ArchiveInspector.getContents(df.getPath()), count, size);
+	    } catch (ArchiveInspectorException e) {
+		throw new RuntimeException(e);
+	    }
+	_uncompressedFileCount = count[0];
+	_uncompressedBytes = size[0];
+	return _uncompressedFileCount;
+    }
+    
+    static void walk(DistributionFile[] dfs, int[] count, long[] size)
+    {
+	for (DistributionFile f: dfs) {
+	    count[0]++;
+	    size[0] += f.getSize();
+	}
+    }
+    
+    public long getUncompressedSize() {
+	getUncompressedFileCount();
+	return _uncompressedBytes;
     }
     
 }

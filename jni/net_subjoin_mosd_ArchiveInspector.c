@@ -9,11 +9,9 @@
 #define UNUSED __attribute__((unused))
 
 #define FILE_DISTRIBUTION_CLASS "Lnet/subjoin/mosd/DistributionFile;"
-#define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE \
-        "(Ljava/lang/String;Ljava/lang/String;J)V"
+#define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE "(Ljava/lang/String;J)V"
 #define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE_WITH_CHILDREN \
-        "(Ljava/lang/String;Ljava/lang/String;J[" \
-        FILE_DISTRIBUTION_CLASS ")V"
+        "(Ljava/lang/String;J[" FILE_DISTRIBUTION_CLASS ")V"
 
 typedef struct {
     JNIEnv *jenv;
@@ -68,10 +66,10 @@ static jobject buildDistributionFileTree(arinspect_entry_t *first_entry,
         if (entry->children) {
             f = (*jenv)->NewObject(jenv, clsDistributionFile,
                 midConstructorWithChildren,
-                /* base, path, size */
-                NULL, (*jenv)->NewStringUTF(jenv, entry->pathname),
+                /* path, size */
+                (*jenv)->NewStringUTF(jenv, entry->pathname),
                 entry->size,
-                /* children */ 
+                /* children */
                 buildDistributionFileTree(entry->children, jenv,
                     clsDistributionFile,
                     midConstructor,
@@ -79,9 +77,8 @@ static jobject buildDistributionFileTree(arinspect_entry_t *first_entry,
         } else {
             f = (*jenv)->NewObject(jenv, clsDistributionFile,
                 midConstructor,
-                /* base, path, size */
-                NULL, (*jenv)->NewStringUTF(jenv, entry->pathname),
-                entry->size);
+                /* path, size */
+                (*jenv)->NewStringUTF(jenv, entry->pathname), entry->size);
         }
 
         (*jenv)->SetObjectArrayElement(jenv, r, i, f);

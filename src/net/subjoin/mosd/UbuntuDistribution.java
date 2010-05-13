@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UbuntuDistribution {
 	private String _releaseName;
-	private File _path;
+	private String _path;
 	private List<DistributionFile> _sourcePackageMetadataFiles;
 	private List<DistributionFile> _binaryPackageMetadataFiles;
 	private List<SourcePackage> _sourcePackages;
@@ -17,7 +17,7 @@ public class UbuntuDistribution {
 	public UbuntuDistribution(String path, String releaseName)
 	throws IOException
 	{
-		_path = new File(path);
+		_path = path;
 		_releaseName = releaseName;
 		_sourcePackageMetadataFiles
 			= new ArrayList<DistributionFile>();
@@ -27,7 +27,7 @@ public class UbuntuDistribution {
 		parseReleaseFile();
 	}
 
-	public File getPath() {
+	public String getPath() {
 		return _path;
 	}
 	
@@ -41,12 +41,13 @@ public class UbuntuDistribution {
 		DebianControlFile release = p.controlFile();
 		
 		for (DistributionFile f: release.getFiles()) {
-		    f.setBase(new File(getPath(), "dists/" + _releaseName));
-		    if (!f.getDirectory().exists())
+		    f.prependToPath(new File(getPath(), "dists/" + _releaseName).getPath());
+		    File rf = new File(f.getPath()); 
+		    if (!rf.getParentFile().exists())
 			continue;
-		    if (f.getName().equals("Sources.gz"))
+		    if (rf.getName().equals("Sources.gz"))
 			_sourcePackageMetadataFiles.add(f);
-		    if (f.getName().equals("Packages.gz"))
+		    if (rf.getName().equals("Packages.gz"))
 			_binaryPackageMetadataFiles.add(f);
 		}
 	}
@@ -68,11 +69,12 @@ public class UbuntuDistribution {
 	    
 	    List<SourcePackage> sourcePackages = new ArrayList<SourcePackage>();
 	    for (DistributionFile f: getSourcePackageMetadataFiles()) {
-		DebianControlFileParser p = new DebianControlFileParser(f.getFile());
+		DebianControlFileParser p = new DebianControlFileParser(
+			new File(f.getPath()));
 		for (DebianControlFile dsc: p) {
 		    SourcePackage sp = new SourcePackage(dsc);
 		    for (DistributionFile spf: sp.getFiles())
-			spf.setBase(getPath());
+			spf.prependToPath(getPath());
 		    sourcePackages.add(sp);
 		}
 	    }

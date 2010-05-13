@@ -19,11 +19,10 @@ public class DistributionFile {
     private static final DistributionFile[] EMPTY_ARRAY
     	 = new DistributionFile[0];
 
-    public DistributionFile(String base, String path, long size,
-	    DistributionFile[] containedFiles)
+    public DistributionFile(String path, long size, DistributionFile[] containedFiles)
     {
 	_base = null;
-	_path = new File(base, path).getPath();
+	_path = path;
 	_size = size;
 	_containedFiles = containedFiles;
 	for (DistributionFile f: _containedFiles) {
@@ -33,34 +32,21 @@ public class DistributionFile {
 	}
     }
     
-    public DistributionFile(String base, String path, long size)
+    public DistributionFile(String path, long size)
     {
-	this(base, path, size, EMPTY_ARRAY);
+	this(path, size, EMPTY_ARRAY);
     }
     
-    public String getName() {
-	return new File(_base, _path).getName();
+    public void prependToPath(String path) {
+	_path = new File(path, _path).getPath();
     }
     
-    public File getFile() {
-	return new File(_base, _path);
-    }
-    
-    public File getDirectory() {
-	return getFile().getParentFile();
-    }
-    
-    public void setBase(File base) {
-	_base = base;
+    public String getPath() {
+	return _path;
     }
     
     public long getSize() {
 	return _size;
-    }
-    
-    public @Override String toString() {
-	return getFile().getPath() + " (" + getSize() + ")"
-		+ (containsOtherFiles() ? " " + getContainedFiles() : "");
     }
     
     public boolean containsOtherFiles() {
@@ -73,5 +59,14 @@ public class DistributionFile {
     
     public DistributionFile getEnclosingFile() {
 	return _enclosingFile;
+    }
+    
+    public boolean hasEnclosingFile() {
+	return _enclosingFile != null;
+    }
+    
+    public @Override String toString() {
+	return _path + " (" + getSize() + ")"
+		+ (containsOtherFiles() ? " " + getContainedFiles() : "");
     }
 }

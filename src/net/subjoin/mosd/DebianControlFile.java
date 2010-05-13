@@ -34,14 +34,14 @@ public class DebianControlFile {
     public List<DistributionFile> getFiles() {
 	List<String> paths = new ArrayList<String>();
 	List<Long> sizes = new ArrayList<Long>();
-	String directory = null;
+	String directory = "";
 
 	Set<String> seen = new TreeSet<String>();
 
 	for (int i = 0; i < _keys.size(); i++) {
 	    String key = _keys.get(i);
 	    if (key.equals("Directory")) {
-		directory = _values.get(i);
+		directory = _values.get(i) + "/";
 		continue;
 	    }
 	    
@@ -62,7 +62,7 @@ public class DebianControlFile {
 
 	List<DistributionFile> ret = new ArrayList<DistributionFile>();
 	for (int i = 0; i < paths.size(); i++) {
-	    ret.add(new DistributionFile(directory, paths.get(i), sizes.get(i)));
+	    ret.add(new DistributionFile(directory + paths.get(i), sizes.get(i)));
 	}
 	return ret;
     }
