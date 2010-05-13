@@ -23,9 +23,11 @@ public class ArchiveInspectorTest {
 			assertEquals("test-archive/foo.txt",
 				contents[0].getFile().getPath());
 			assertTrue(contents[1].containsOtherFiles());
-			assertEquals("qux/bar.txt",
-				contents[1].getContainedFiles().get(0)
-					.getFile().getPath());
+			assertEquals("inside/baz.txt",
+				contents[1].getContainedFiles()
+				.get(0).getFile().getPath());
+			assertEquals("test-archive/qux/bar.txt",
+				contents[2].getFile().getPath());
 		    }
 		});
     

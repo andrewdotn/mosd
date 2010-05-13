@@ -8,6 +8,11 @@
 #define UNUSED __attribute__((unused))
 
 #define FILE_DISTRIBUTION_CLASS "Lnet/subjoin/mosd/DistributionFile;"
+#define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE \
+        "(Ljava/lang/String;Ljava/lang/String;J)V"
+#define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE_WITH_CHILDREN \
+        "(Ljava/lang/String;Ljava/lang/String;J[" \
+        FILE_DISTRIBUTION_CLASS ")V"
 
 typedef struct {
     JNIEnv *jenv;
@@ -41,6 +46,49 @@ static void raise_exception(int archive_errno,
         error_string);
 }
 
+static jobject buildDistributionFileTree(arinspect_entry_t *first_entry,
+    JNIEnv* jenv, jclass clsDistributionFile,
+    jmethodID midConstructor, jmethodID midConstructorWithChildren)
+{
+    int entry_count = 0;
+    arinspect_entry_t *entry = first_entry;
+    while (entry) {
+        entry_count++;
+        entry = entry->next;
+    }
+
+    jobjectArray r = (*jenv)->NewObjectArray(jenv, entry_count,
+        clsDistributionFile, NULL);
+
+    entry = first_entry;
+    int i = 0;
+    for (i = 0; i < entry_count; i++) {
+        jobject f;
+        if (entry->children) {
+            f = (*jenv)->NewObject(jenv, clsDistributionFile,
+                midConstructorWithChildren,
+                /* base, path, size */
+                NULL, (*jenv)->NewStringUTF(jenv, entry->pathname),
+                entry->size,
+                /* children */ 
+                buildDistributionFileTree(entry->children, jenv,
+                    clsDistributionFile,
+                    midConstructor,
+                    midConstructorWithChildren));
+        } else {
+            f = (*jenv)->NewObject(jenv, clsDistributionFile,
+                midConstructor,
+                /* base, path, size */
+                NULL, (*jenv)->NewStringUTF(jenv, entry->pathname),
+                entry->size);
+        }
+
+        (*jenv)->SetObjectArrayElement(jenv, r, i, f);
+        entry = entry->next;
+    }
+    return r;
+}
+
 /*
  * Class:     net_subjoin_mosd_ArchiveInspector
  * Method:    getContents
@@ -49,7 +97,7 @@ static void raise_exception(int archive_errno,
 JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
   (JNIEnv *jenv, jobject UNUSED o, jstring jPath)
 {
-    arinspect_entry_t *first_entry, *entry;
+    arinspect_entry_t *first_entry;
 
     closure_t closure = { jenv, 0 };
     const char* path_string = (*jenv)->GetStringUTFChars(jenv,
@@ -60,13 +108,6 @@ JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
 
     if (closure.failed)
         return NULL;
-
-    int entry_count = 0;
-    entry = first_entry;
-    while (entry != NULL) {
-        entry_count++;
-        entry = entry->next;
-    }
 
     jclass clsDistributionFile = (*jenv)->FindClass(jenv,
         FILE_DISTRIBUTION_CLASS);
@@ -80,27 +121,33 @@ JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
 
     jmethodID midDistributionFileConstructor = (*jenv)->GetMethodID(jenv,
         clsDistributionFile, "<init>",
-        "(Ljava/lang/String;Ljava/lang/String;J)V");
+        FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE);
     if (midDistributionFileConstructor == NULL) {
         jclass clsNoSuchMethodException = (*jenv)->FindClass(jenv,
             "Ljava/lang/NoSuchMethodException;");
         (*jenv)->ThrowNew(jenv, clsNoSuchMethodException,
-            "constructor ()V in " FILE_DISTRIBUTION_CLASS);
+            "constructor " FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE
+            " in " FILE_DISTRIBUTION_CLASS);
+        return NULL;
+    }
+    jmethodID midDistributionFileConstructorWithChildren
+        = (*jenv)->GetMethodID(jenv,
+            clsDistributionFile, "<init>",
+            FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE_WITH_CHILDREN);
+    if (midDistributionFileConstructorWithChildren == NULL) {
+        jclass clsNoSuchMethodException = (*jenv)->FindClass(jenv,
+            "Ljava/lang/NoSuchMethodException;");
+        (*jenv)->ThrowNew(jenv, clsNoSuchMethodException,
+            "constructor "
+            FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE_WITH_CHILDREN
+            " in " FILE_DISTRIBUTION_CLASS);
         return NULL;
     }
 
-    jobjectArray r = (*jenv)->NewObjectArray(jenv, entry_count,
-        clsDistributionFile, NULL);
-    entry = first_entry;
-    int i;
-    for (i = 0; i < entry_count; i++) {
-        jobject f = (*jenv)->NewObject(jenv, clsDistributionFile,
-            midDistributionFileConstructor,
-            /* base, path, size */
-            NULL, (*jenv)->NewStringUTF(jenv, entry->pathname), entry->size);
-        (*jenv)->SetObjectArrayElement(jenv, r, i, f);
-        entry = entry->next;
-    }
+    jobject r = buildDistributionFileTree(first_entry,
+        jenv, clsDistributionFile,
+        midDistributionFileConstructor,
+        midDistributionFileConstructorWithChildren);
     arinspect_free_list(first_entry);
     return r;
 }

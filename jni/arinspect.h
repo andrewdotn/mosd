@@ -12,7 +12,6 @@ typedef struct _arinspect_entry {
     int64_t size;
     time_t modtime;
     struct _arinspect_entry* children;
-    struct _arinspect_entry* parent;
     struct _arinspect_entry* next;
 } arinspect_entry_t;
 

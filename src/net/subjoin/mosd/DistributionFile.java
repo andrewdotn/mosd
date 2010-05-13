@@ -59,7 +59,8 @@ public class DistributionFile {
     }
     
     public @Override String toString() {
-	return getFile().getPath() + " [" + getSize() + "]";
+	return getFile().getPath() + " (" + getSize() + ")"
+		+ (containsOtherFiles() ? " " + getContainedFiles() : "");
     }
     
     public boolean containsOtherFiles() {

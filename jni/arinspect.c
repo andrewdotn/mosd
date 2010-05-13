@@ -15,7 +15,10 @@ void arinspect_free_list(arinspect_entry_t* entry) {
     while (entry != NULL) {
         free(entry->pathname);
         free(entry->file_type);
-        arinspect_free_list(entry->children);
+        if (entry->children) {
+            arinspect_free_list(entry->children);
+            entry->children = NULL;
+        }
         next = entry->next;
         free(entry);
         entry = next;
@@ -29,7 +32,6 @@ arinspect_entry_t* new_entry(arinspect_entry_t* old)
     r->next = NULL;
     r->file_type = NULL;
     r->children = NULL;
-    r->parent = NULL;
     if (old != NULL)
         old->next = r;
     return r;
@@ -67,8 +69,7 @@ call_error_handler(
 static
 int
 arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
-    arinspect_entry_t** entries,
-    arinspect_error_handler_t error_handler,
+    arinspect_entry_t** entries, arinspect_error_handler_t error_handler,
     void* closure_for_error_handler)
 {
     struct archive *a;
