@@ -24,4 +24,7 @@ arinspect_entry_t* arinspect_entries(const char* filename,
         arinspect_error_handler_t foo, void* closure_for_error_handler);
 void arinspect_free_list(arinspect_entry_t*);
 
+/* For unit tests only. */
+int shouldLookInside(const char* pathname);
+
 #endif

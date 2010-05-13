@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+TOOL_NAME="${1}"
+shift
+
+DIR="$(dirname -- "${0}")"
+
+classpath=""
+for lib in \
+    bin \
+    external/junit-4.8.2.jar \
+    external/google-collect-1.0.jar \
+    ;
+do
+    classpath="${classpath}:${DIR}/${lib}"
+done
+classpath="${classpath#:}"
+
+OTHER_OPTS=()
+if [ "${TOOL_NAME##*/}" = "java" ]; then
+    OTHER_OPTS=(-Djava.library.path="${DIR}/jni")
+fi
+
+exec "${TOOL_NAME}" \
+     -classpath "${classpath}" \
+     "${OTHER_OPTS[@]}" \
+     "${@}"

@@ -4,6 +4,7 @@
 
 #include "arinspect.h"
 #include "net_subjoin_mosd_ArchiveInspector.h"
+#include "net_subjoin_mosd_ArchiveInspectorTest.h"
 
 #define UNUSED __attribute__((unused))
 
@@ -149,5 +150,20 @@ JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
         midDistributionFileConstructor,
         midDistributionFileConstructorWithChildren);
     arinspect_free_list(first_entry);
+    return r;
+}
+
+/*
+ * Class:     net_subjoin_mosd_ArchiveInspectorTest
+ * Method:    shouldLookInside
+ * Signature: (Ljava/lang/String;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_net_subjoin_mosd_ArchiveInspectorTest_shouldLookInside
+  (JNIEnv *jenv, jclass cls, jstring jPath)
+{
+    const char* path = (*jenv)->GetStringUTFChars(jenv,
+        jPath, NULL);
+    int r = shouldLookInside(path);
+    (*jenv)->ReleaseStringUTFChars(jenv, jPath, path);
     return r;
 }

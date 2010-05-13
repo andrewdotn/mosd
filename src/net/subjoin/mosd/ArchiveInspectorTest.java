@@ -87,12 +87,24 @@ public class ArchiveInspectorTest {
 		});
     }
     
-    public static void main(String[] args)
-    throws IOException
-    {
-	new ArchiveInspectorTest().testBasics();
-	for (String s: args)
-	    System.out.println(Arrays.toString(ArchiveInspector.getContents(s)));
+    private static native boolean shouldLookInside(String pathname);
+    
+    public @Test void testLookInside() {
+	assertFalse(shouldLookInside("foo.txt"));
+	assertFalse(shouldLookInside("foo.fartfartfart"));
+	assertFalse(shouldLookInside("noextension"));
+	assertTrue(shouldLookInside("test.lzma"));
+	assertFalse(shouldLookInside("lzma.txt"));
+	assertTrue(shouldLookInside("foo.tgz"));
+	assertTrue(shouldLookInside("foo.tar"));
+	assertTrue(shouldLookInside("foo.zip"));
+	assertTrue(shouldLookInside("foo.bar.zip"));
+
+	assertTrue(shouldLookInside("foo.tar.gz"));
+	assertFalse(shouldLookInside("foo.txt.gz"));
+	assertTrue(shouldLookInside("foo.txt.tar.gz"));	
+	assertTrue(shouldLookInside("foo.tar.bz2"));
     }
+
 
 }

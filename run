@@ -3,12 +3,12 @@
 if [ -f "${1}" ]; then
      CLASS="${1%.java}"
      CLASS="${CLASS#src/}"
-else     
+ else
     CLASS="net.subjoin.mosd.${1}"
 fi
-
 shift
 
-exec java -cp bin:external/junit-4.8.2.jar -Djava.library.path=jni \
-     "${CLASS}" "${@}"
+DIR="$(dirname -- "${0}")"
+
+exec "${DIR}/javatool" java "${CLASS}" "${@}"
 

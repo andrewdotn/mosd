@@ -8,5 +8,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="mosd/jni"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="external/google-collect-1.0.jar" sourcepath="external/google-collect-1.0-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

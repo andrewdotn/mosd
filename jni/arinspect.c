@@ -37,14 +37,33 @@ arinspect_entry_t* new_entry(arinspect_entry_t* old)
     return r;
 }
 
-static int shouldLookInside(const char* pathname) {
-    const char* lastDot = strrchr(pathname, '.');
+static int shouldLookInside1(char* pathname) {
+    char* lastDot = strrchr(pathname, '.');
     if (!lastDot)
         return 0;
-    const char* extension = lastDot;
-    if (!strcmp(extension, ".lzma"))
+    char* extension = lastDot;
+    if (!strcmp(extension, ".lzma") || !strcmp(extension, ".tgz")
+        || !strcmp(extension, ".tar") || !strcmp(extension, ".zip"))
+        return 1;
+    char c = *extension;
+    *extension = '\0';
+    char *secondLastDot = strrchr(pathname, '.');
+    *extension = c;
+    if (!secondLastDot)
+        return 0;
+    if (!strcmp(secondLastDot, ".tar.gz") || !strcmp(secondLastDot, ".tar.bz2"))
         return 1;
     return 0;
+}
+
+/* For unit tests only. */
+int shouldLookInside(const char* inPathname) {
+    /* The inspection modifies the pathname. Instead of violating constness
+     * we make a private copy and modify that. */
+    char* pathname = strdup(inPathname);
+    int r = shouldLookInside1(pathname);
+    free(pathname);
+    return r;
 }
 
 static void
