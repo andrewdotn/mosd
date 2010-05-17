@@ -1,25 +1,18 @@
 package net.subjoin.mosd;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class Main {
 	
@@ -102,23 +95,22 @@ public class Main {
 		totalBytes = 0;
 		long totalFiles = 0;
 		int i = 0;
-		Set<String> erroredOut = Sets.newHashSet();
-		NumberFormat nf = NumberFormat.getInstance();
-		File newCacheFile = new File(cacheFile.getName() + ".new");
-		ObjectOutputStream os = new ObjectOutputStream(
-			new BufferedOutputStream(
-				new GZIPOutputStream(
-				new FileOutputStream(newCacheFile))));
+//		Set<String> erroredOut = Sets.newHashSet();
+//		NumberFormat nf = NumberFormat.getInstance();
+//		File newCacheFile = new File(cacheFile.getName() + ".new");
+//		ObjectOutputStream os = new ObjectOutputStream(
+//			new BufferedOutputStream(
+//				new GZIPOutputStream(
+//				new FileOutputStream(newCacheFile))));
 		for (SourcePackage sp: spl) {
 		    try {
-			System.out.println(sp.getName());
 			totalBytes += sp.getUncompressedBytes();
 			totalFiles += sp.getUncompressedFileCount();
 			
-			os.writeObject(sp);
+			//os.writeObject(sp);
 		    } catch (RuntimeException e) {
 			System.err.println(e);
-			erroredOut.add(sp.getName());
+//			erroredOut.add(sp.getName());
 		    }
 		    
 //		    System.out.format("%s %d/%d, %s files, %s bytes\n",
@@ -127,13 +119,13 @@ public class Main {
 //			    nf.format(totalBytes));
 		    i++;
 		}
-		os.close();
-		if (!newCacheFile.renameTo(cacheFile))
-		    throw new RuntimeException("couldn’t rename file");
-		
-		System.out.println("Errors on:");
-		for (String s: erroredOut)
-		    System.out.println("\t" + s);
+//		os.close();
+//		if (!newCacheFile.renameTo(cacheFile))
+//		    throw new RuntimeException("couldn’t rename file");
+//		
+//		System.out.println("Errors on:");
+//		for (String s: erroredOut)
+//		    System.out.println("\t" + s);
 
 	
 		/*

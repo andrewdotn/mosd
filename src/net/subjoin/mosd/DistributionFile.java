@@ -133,7 +133,13 @@ public class DistributionFile {
 	if (_containedFiles != null)
 	    return;
 	
-	DistributionFile[] contents = ArchiveInspector.getContents(getPath());
+	DistributionFile[] contents = ArchiveInspector.getContents(getPath(),
+		new ArchiveInspectorErrorHandler() {
+		    public @Override void handleError(String message)
+		    throws ArchiveInspectorException {
+			System.err.println(message);
+		    }
+		});
 	setContents(contents);
     }
     
