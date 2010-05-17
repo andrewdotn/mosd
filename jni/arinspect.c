@@ -166,7 +166,7 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
 
             int filename_message_size = snprintf(NULL, 0, "%s inside %s",
                 archive_entry_pathname(a_entry), filename);
-            char* fnbuf = (char*)malloc(filename_message_size);
+            char* fnbuf = (char*)malloc(filename_message_size + 1);
             if (!fnbuf) {
                 sprintf(buf, "Failed to allocated %lld bytes",
                     entry->size);
@@ -175,10 +175,11 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
                     filename, closure_for_error_handler);
                 return ARINSPECT_ERROR;
             }
-            snprintf(fnbuf, filename_message_size, "%s inside %s",
+            snprintf(fnbuf, filename_message_size + 1, "%s inside %s",
                 archive_entry_pathname(a_entry), filename);
             r = arinspect_entries1(fnbuf, buffer, entry->size,
                 &child_entries, error_handler, closure_for_error_handler);
+            free(buffer);
             free(fnbuf);
             if (r != ARINSPECT_OK)
                 return r;

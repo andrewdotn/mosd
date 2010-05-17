@@ -31,6 +31,10 @@ public class UbuntuDistribution {
 		return _path;
 	}
 	
+	public String getReleaseName() {
+	    return _releaseName;
+	}
+	
 	private void parseReleaseFile()
 	throws IOException
 	{
@@ -81,5 +85,12 @@ public class UbuntuDistribution {
 	    _sourcePackages = sourcePackages;
 	    return getSourcePackages();
 	}
+	
+	public void saveToFile() {
+	    
+	}
 
+	public void readFromFile(File f) {
+
+	}
 }

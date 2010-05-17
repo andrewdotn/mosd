@@ -1,5 +1,12 @@
 #!/bin/bash
 
+OPTS=()
+
+while [ "${1:0:1}" = "-" ]; do
+    OPTS=("${OPTS[@]}" "${1}")
+    shift
+done
+
 if [ -f "${1}" ]; then
      CLASS="${1%.java}"
      CLASS="${CLASS#src/}"
@@ -10,5 +17,5 @@ shift
 
 DIR="$(dirname -- "${0}")"
 
-exec "${DIR}/javatool" java "${CLASS}" "${@}"
+exec "${DIR}/javatool" java "${OPTS[@]}" "${CLASS}" "${@}"
 
