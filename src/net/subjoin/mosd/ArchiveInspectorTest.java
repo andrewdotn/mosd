@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -111,5 +113,27 @@ void testCorruptArchive()
 	    file.close();
 	}
 	assertTrue(thrown);
+    }
+    
+    public @Test void testCorruptInside()
+    throws ArchiveInspectorException
+    {
+	TestFile file = Util.loadTestFile("test-corrupt-inside.tar.gz");
+	final List<String> errors = new ArrayList<String>();
+	try {
+	    DistributionFile[] files = ArchiveInspector.getContents(file.getPath(),
+		    new ArchiveInspectorErrorHandler() {
+			public @Override void handleError(String message)
+			throws ArchiveInspectorException {
+			    errors.add(message);
+			}
+	    });
+	    assertEquals("test-corrupt-inside/b.zip", files[0].getPath());
+	    assertTrue(files[0].containsOtherFiles());
+	    assertEquals("test-corrupt-inside/foo.txt", files[1].getPath());
+	    assertEquals(1, errors.size());
+	} finally {
+	    file.close();
+	}
     }
 }

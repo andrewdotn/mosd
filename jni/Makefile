@@ -12,7 +12,9 @@ SRCS = \
        net_subjoin_mosd_JNITest.c \
 
 
-all: libmosd.jnilib mosd_jni.jar
+all: libmosd.jnilib mosd_jni.jar testprog
+
+testprog: arinspect.o testprog.o
 
 libmosd.jnilib: ${SRCS:%.c=%.o}
 	gcc ${CFLAGS} -shared $^ -o $@ ${LDFLAGS}
@@ -37,3 +39,4 @@ clean:
 	    -- *.h | xargs -0 rm -f --
 
 -include ${SRCS:%.c=%.d}
+-include testprog.d

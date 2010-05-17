@@ -15,7 +15,7 @@ typedef struct _arinspect_entry {
     struct _arinspect_entry* next;
 } arinspect_entry_t;
 
-typedef void arinspect_error_handler_t(int archive_errno,
+typedef int arinspect_error_handler_t(int archive_errno,
     const char* error_string, void* closure);
 
 /* If an error occurs, error_handler is called and NULL is returned.

@@ -66,7 +66,7 @@ int shouldLookInside(const char* inPathname) {
     return r;
 }
 
-static void
+static int
 call_error_handler(
     struct archive *a,
     arinspect_error_handler_t error_handler,
@@ -77,7 +77,7 @@ call_error_handler(
     int ar_errno = archive_errno(a);
     if (error_handler) {
         snprintf(buf, sizeof(buf)/sizeof(buf[0]), "%s: %s", filename, message);
-        error_handler(ar_errno, buf, closure_for_error_handler);
+        return error_handler(ar_errno, buf, closure_for_error_handler);
     } else {
         /* The ENOENT error message includes the file name. */
         if (ar_errno != ENOENT)
@@ -85,6 +85,7 @@ call_error_handler(
         else
             warnx("%s", message);
     }
+    return ARINSPECT_ERROR;
 }
 
 /*
@@ -101,6 +102,8 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
     arinspect_entry_t *entry, *first_entry;
     int r;
 
+    *entries = NULL;
+
     a = archive_read_new();
     archive_read_support_compression_all(a);
     archive_read_support_format_all(a);
@@ -115,9 +118,8 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
     } else {
         r = archive_read_open_memory(a, buffer, bufsize);
         if (r != ARCHIVE_OK) {
-            call_error_handler(a, error_handler,
+            return call_error_handler(a, error_handler,
                 filename, closure_for_error_handler);
-            return ARINSPECT_ERROR;
         }
     }
 
@@ -125,9 +127,9 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
     first_entry = NULL;
     while (r = archive_read_next_header(a, &a_entry), r != ARCHIVE_EOF) {
         if (r != ARCHIVE_OK) {
-            call_error_handler(a, error_handler,
+            r = call_error_handler(a, error_handler,
                 filename, closure_for_error_handler);
-            return ARINSPECT_ERROR;
+            return r;
         }
 
         if (archive_entry_filetype(a_entry) != AE_IFREG)
@@ -182,7 +184,7 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
             free(buffer);
             free(fnbuf);
             if (r != ARINSPECT_OK)
-                return r;
+                break;
 
             entry->children = child_entries;
         }
@@ -195,7 +197,6 @@ arinspect_entries1(const char* filename, void* buffer, size_t bufsize,
             filename, closure_for_error_handler);
         return ARINSPECT_ERROR;
     }
-
     *entries = first_entry;
     return ARINSPECT_OK;
 }

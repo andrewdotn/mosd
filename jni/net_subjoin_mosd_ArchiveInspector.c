@@ -12,9 +12,15 @@
 #define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE "(Ljava/lang/String;J)V"
 #define FILE_DISTRIBUTION_CONSTRUCTOR_SIGNATURE_WITH_CHILDREN \
         "(Ljava/lang/String;J[" FILE_DISTRIBUTION_CLASS ")V"
+#define ERROR_HANDLER_CLASS \
+         "Lnet/subjoin/mosd/ArchiveInspectorErrorHandler;"
+#define ERROR_HANDLER_METHOD_NAME "handleError"
+#define ERROR_HANDLER_METHOD_SIG "(Ljava/lang/String;)V"
+#define CLASS_NOT_FOUND_EXCEPTION_CLASS "Ljava/lang/ClassNotFoundException;"
 
 typedef struct {
     JNIEnv *jenv;
+    jobject realHandler;
     int failed;
 } closure_t;
 
@@ -23,26 +29,52 @@ static void raise_exception_with_message(JNIEnv *jenv,
 {
     jclass cls = (*jenv)->FindClass(jenv, className);
     if (!cls) {
-        cls = (*jenv)->FindClass(jenv, "Ljava/lang/ClassNotFoundException;");
+        cls = (*jenv)->FindClass(jenv, CLASS_NOT_FOUND_EXCEPTION_CLASS);
     }
     (*jenv)->ThrowNew(jenv, cls, message);
 }
 
-static void raise_exception(int archive_errno,
+static int call_error_handler(int archive_errno,
     const char* error_string, void* v_closure)
 {
     closure_t* closure = (closure_t*)v_closure;
-    closure->failed = 1;
+    JNIEnv* jenv = closure->jenv;
 
     const char* exceptionClassName;
     if (archive_errno == ENOENT) {
         exceptionClassName = "Ljava/io/FileNotFoundException;";
+        raise_exception_with_message(closure->jenv,
+            exceptionClassName,
+            error_string);
+        closure->failed = ARINSPECT_ERROR;
     } else {
-        exceptionClassName = "Lnet/subjoin/mosd/ArchiveInspectorException;";
+        jclass clsErrorHandler = (*jenv)->FindClass(jenv,
+            ERROR_HANDLER_CLASS);
+        if (!clsErrorHandler) {
+            raise_exception_with_message(jenv,
+                CLASS_NOT_FOUND_EXCEPTION_CLASS,
+                ERROR_HANDLER_CLASS);
+            return ARINSPECT_ERROR;
+        }
+
+        jmethodID mid = (*jenv)->GetMethodID(jenv, clsErrorHandler,
+            ERROR_HANDLER_METHOD_NAME, ERROR_HANDLER_METHOD_SIG);
+        if (!mid) {
+            raise_exception_with_message(jenv,
+                "Ljava/lang/NoSuchMethodException;",
+                ERROR_HANDLER_METHOD_NAME ERROR_HANDLER_METHOD_SIG
+                " in " ERROR_HANDLER_CLASS);
+            return ARINSPECT_ERROR;
+        }
+
+        jstring jmessage = (*jenv)->NewStringUTF(jenv, error_string);
+        (*jenv)->CallVoidMethod(jenv, closure->realHandler, mid, jmessage);
+
+        if ((*jenv)->ExceptionOccurred(jenv))
+            closure->failed = ARINSPECT_ERROR;
     }
-    raise_exception_with_message(closure->jenv,
-        exceptionClassName,
-        error_string);
+
+    return closure->failed;
 }
 
 static jobject buildDistributionFileTree(arinspect_entry_t *first_entry,
@@ -90,18 +122,18 @@ static jobject buildDistributionFileTree(arinspect_entry_t *first_entry,
 /*
  * Class:     net_subjoin_mosd_ArchiveInspector
  * Method:    getContents
- * Signature: (Ljava/lang/String;)[Lnet/subjoin/mosd/DistributionFile;
+ * Signature: (Ljava/lang/String;Lnet/subjoin/mosd/ArchiveInspector/ErrorHandler;)[Lnet/subjoin/mosd/DistributionFile;
  */
-JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
-  (JNIEnv *jenv, jobject UNUSED o, jstring jPath)
+JNIEXPORT jobjectArray JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
+  (JNIEnv *jenv, jclass UNUSED cls, jstring jPath, jobject jErrorHandler)
 {
     arinspect_entry_t *first_entry;
 
-    closure_t closure = { jenv, 0 };
+    closure_t closure = { jenv, jErrorHandler, ARINSPECT_OK };
     const char* path_string = (*jenv)->GetStringUTFChars(jenv,
         jPath, NULL);
     first_entry = arinspect_entries(path_string,
-        raise_exception, (void*)&closure);
+        call_error_handler, (void*)&closure);
     (*jenv)->ReleaseStringUTFChars(jenv, jPath, path_string);
 
     if (closure.failed)
@@ -156,7 +188,7 @@ JNIEXPORT jobject JNICALL Java_net_subjoin_mosd_ArchiveInspector_getContents
  * Signature: (Ljava/lang/String;)Z
  */
 JNIEXPORT jboolean JNICALL Java_net_subjoin_mosd_ArchiveInspectorTest_shouldLookInside
-  (JNIEnv *jenv, jclass cls, jstring jPath)
+  (JNIEnv *jenv, jclass UNUSED cls, jstring jPath)
 {
     const char* path = (*jenv)->GetStringUTFChars(jenv,
         jPath, NULL);
