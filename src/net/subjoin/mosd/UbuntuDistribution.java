@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Iterators;
 
 public class UbuntuDistribution {
 	private String _releaseName;
@@ -86,11 +90,20 @@ public class UbuntuDistribution {
 	    return getSourcePackages();
 	}
 	
-	public void saveToFile() {
-	    
-	}
-
-	public void readFromFile(File f) {
-
+	public static Iterator<DistributionFile> iterateAllSourceFiles(
+		final Iterable<SourcePackage> spit)
+	{
+	    return new AbstractIterator<DistributionFile>() {
+		Iterator<SourcePackage> metait = spit.iterator();
+		Iterator<DistributionFile> it = Iterators.emptyIterator();
+		protected @Override DistributionFile computeNext() {
+		    if (it.hasNext())
+			return it.next();
+		    if (!metait.hasNext())
+			return endOfData();
+		    it = metait.next().iterateSourceFiles();
+		    return computeNext();
+		}
+	    };
 	}
 }

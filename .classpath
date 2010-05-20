@@ -9,5 +9,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="external/google-collect-1.0.jar" sourcepath="external/google-collect-1.0-src.jar"/>
+	<classpathentry kind="lib" path="external/JSAP-2.1.jar" sourcepath="external/JSAP-2.1-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

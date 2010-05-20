@@ -98,6 +98,9 @@ void testCorruptArchive()
 	assertFalse(shouldLookInside("foo.txt.gz"));
 	assertTrue(shouldLookInside("foo.txt.tar.gz"));	
 	assertTrue(shouldLookInside("foo.tar.bz2"));
+	
+	assertTrue(shouldLookInside("foo.war"));
+	assertTrue(shouldLookInside("foo.jar"));
     }
 
     public @Test void testUsefulErrorMessage() {

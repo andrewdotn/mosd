@@ -43,7 +43,8 @@ static int shouldLookInside1(char* pathname) {
         return 0;
     char* extension = lastDot;
     if (!strcmp(extension, ".lzma") || !strcmp(extension, ".tgz")
-        || !strcmp(extension, ".tar") || !strcmp(extension, ".zip"))
+        || !strcmp(extension, ".tar") || !strcmp(extension, ".zip")
+        || !strcmp(extension, ".jar") || !strcmp(extension, ".war"))
         return 1;
     char c = *extension;
     *extension = '\0';
