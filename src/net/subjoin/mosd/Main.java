@@ -12,10 +12,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -36,6 +38,9 @@ public class Main {
     private static final String OPT_LIMIT = "limit for summary displays";
     private static final String OPT_FIND = "find file matching regex";
     private static final String OPT_WRITE_CACHE = "write cache file";
+    private static final String OPT_INTERACTIVE = "interactive mode";
+    private static final String OPT_LANGCOUNT
+    	= "show info for packages with this many languages";
     
 	public static void main(String[] args)
 	throws Exception
@@ -47,7 +52,10 @@ public class Main {
 		    new FlaggedOption(OPT_LIMIT).setShortFlag('l')
 		    	.setStringParser(INTEGER_PARSER).setDefault("10"),
 		    new FlaggedOption(OPT_FIND).setShortFlag('f'),
-		    new Switch(OPT_WRITE_CACHE).setShortFlag('w')
+		    new FlaggedOption(OPT_LANGCOUNT).setShortFlag('L')
+		    	.setStringParser(INTEGER_PARSER).setDefault("2"),
+		    new Switch(OPT_WRITE_CACHE).setShortFlag('w'),
+		    new Switch(OPT_INTERACTIVE).setShortFlag('i')
 	    });
 	    
 	    JSAPResult config = jsap.parse(args);
@@ -181,6 +189,18 @@ public class Main {
 		    System.out.println(cl.getTopUnknown(config.getInt(OPT_LIMIT)));
 		}
 		
+//		for (SourcePackage sp: spl) {
+//		    System.out.println(sp.getName());
+//		    for (int i = 0; i < sp.getName().length(); i++)
+//			System.out.print('=');
+//		    System.out.println();
+//		    LanguageClassifier cl = new LanguageClassifier();
+//		    cl.classify(sp.iterateSourceFiles());
+//		    System.out.println(cl.getTopUnknown(config.getInt(OPT_LIMIT)));
+//		    System.out.println(cl.getLanuageClassification());
+//		}
+		
+		
 		
 //		for (SourcePackage sp: spl) {
 //		    Iterator<DistributionFile> itdf = sp.iterateSourceFiles();
@@ -253,6 +273,141 @@ public class Main {
         		os.close();
         		if (!newCacheFile.renameTo(cacheFile))
         		    throw new RuntimeException("couldn’t rename file");
+		}
+		
+//		List<Entry<String, Integer>> langcounts = Lists.newArrayList();
+//		for (SourcePackage sp: spl) {
+//		    LanguageClassifier cl = new LanguageClassifier();
+//		    cl.classify(sp.iterateSourceFiles());
+//		    langcounts.add(new SimpleImmutableEntry<String, Integer>(
+//			    sp.getName(), cl.getLanguageCount()));
+//		}
+//		Collections.sort(langcounts, new Comparator<Entry<String, Integer>>() {
+//		    public @Override int compare(Entry<String, Integer> a,
+//			    Entry<String, Integer> b)
+//		    {
+//			return Long.signum((long)b.getValue() - a.getValue());
+//		    }
+//		});
+//		{
+//		    int i = 0;
+//		    for (Entry<String, Integer> e: langcounts) {
+//			System.out.format("%4d %s\n", e.getValue(), e.getKey());
+//			if (i++ > 50)
+//			    break;
+//		    }
+//		}
+		
+//		// Count and sample packages by language count
+//		List<SourcePackage> specificCountPackages = new ArrayList<SourcePackage>();
+//		AccumulatingMap<List<String>> oneLangs = AccumulatingMap.create();
+//		final int targetLangCount = config.getInt(OPT_LANGCOUNT);
+//		System.out.println("Langcount counts");
+//		AccumulatingMap<Integer> langCountCounts = AccumulatingMap.create();
+//		for (SourcePackage sp: spl) {
+//		    LanguageClassifier cl = new LanguageClassifier();
+//		    cl.classify(sp.iterateSourceFiles());
+//		    int langCount = cl.getLanguageCount();
+//		    langCountCounts.increment(langCount);
+//		    if (langCount == targetLangCount) {
+//			specificCountPackages.add(sp);
+//			List<String> l = Lists.newArrayList(cl.getLanguages());
+//			Collections.sort(l);
+//			oneLangs.increment(l);
+//		    }
+//		}
+//		List<Integer> c = new ArrayList<Integer>(langCountCounts.keys());
+//		Collections.sort(c);
+//		for (Integer i: c) {
+//		    System.out.format("%,6d %d\n", langCountCounts.get(i), i);
+//		}
+//		System.out.println(oneLangs.getTopEntries(Integer.MAX_VALUE - 1));
+//
+//		if (specificCountPackages.size() > 15)
+//		    specificCountPackages = Util.choose(specificCountPackages, 15,
+//			    "n-language package".hashCode());
+//		for (SourcePackage sp: specificCountPackages) {
+//		    System.out.println("Selected " + sp.getName());
+//		    LanguageClassifier cl = new LanguageClassifier();
+//		    cl.classify(sp.iterateSourceFiles());
+//		    System.out.println(cl.getLanuageClassification());
+//		}
+		
+		
+		{
+		List<SourcePackage> sample = new ArrayList<SourcePackage>();
+		// TODO: sort by name
+		List<String> packs = new ArrayList<String>();
+		for (SourcePackage sp: spl)
+		    packs.add(sp.getName());
+		Collections.sort(packs);
+		for (String s: packs) {
+		    SourcePackage sp = cache.get(s);
+		    LanguageClassifier cl = new LanguageClassifier();
+		    cl.classify(sp.iterateSourceFiles());
+		    int languageCount = cl.getLanguageCount();
+		    System.out.format("%3d %s\n", languageCount, sp.getName());
+		    if (languageCount < 2)
+			continue;
+		    for (int i = 0; i < languageCount; i++)
+			sample.add(sp);
+		}
+		sample = Util.choose(sample, 200, "multi language systems".hashCode());
+		System.out.println("Sample:");
+		System.out.println("#!/bin/bash");
+		System.out.println("set -eu");
+		int i = 0;
+		for (SourcePackage sp: sample) {
+		    i++;
+		    System.out.println("# " + sp.getName());
+//		    String dir = String.format("%04d", i);
+//		    System.out.format("rmdir %s\nmkdir %s\ncd %s\n", dir, dir, dir);
+//		    for (DistributionFile df: sp.getFiles())
+//			if (SourcePackage.isUpstreamFile(df))
+//			    System.out.println("tar xf " + new File("..", df.getPath()));
+//		    System.out.println("cd ..");
+		}
+		}
+		
+		if (!config.getBoolean(OPT_INTERACTIVE))
+		    return;
+		
+		System.out.print("> ");
+		Scanner s = new Scanner(System.in);
+		while (s.hasNextLine()) {
+		    String[] cmd = s.nextLine().split("\\s+");
+		    if (cmd[0].equals("unknown")) {
+			if (cmd.length > 1) {
+			    for (String packageName:  Arrays.copyOfRange(cmd, 1, cmd.length)) {
+				SourcePackage sp = cache.get(packageName);
+				if (sp == null) {
+				    System.out.println("not found.");
+				    break;
+				}				
+				System.out.println(sp.getName());
+				LanguageClassifier cl = new LanguageClassifier();
+				cl.classify(sp.iterateSourceFiles());
+				System.out.println(cl.getTopUnknown());
+			    }
+			}
+		    } else if (cmd[0].equals("class")) {
+			if (cmd.length > 1) {
+			    for (String packageName:  Arrays.copyOfRange(cmd, 1, cmd.length)) {
+				SourcePackage sp = cache.get(packageName);
+				if (sp == null) {
+				    System.out.println("not found.");
+				    break;
+				}
+				System.out.println(sp.getName());
+				LanguageClassifier cl = new LanguageClassifier();
+				cl.classify(sp.iterateSourceFiles());
+				System.out.println(cl.getLanuageClassification());
+			    }
+			}			
+		    } else {
+			System.out.println("?");
+		    }
+		    System.out.print("> ");
 		}
 	}
 

@@ -73,7 +73,7 @@ implements Serializable
 	_walked = true;
     }
     
-    private boolean isUpstreamFile(DistributionFile df) {
+    public static boolean isUpstreamFile(DistributionFile df) {
 	File f = new File(df.getPath());
 	return !f.getName().endsWith(".dsc")
 		&& !f.getName().endsWith(".diff.gz");

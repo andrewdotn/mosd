@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 
@@ -106,5 +111,31 @@ public class Util {
 		    tempFile.delete();
 		}
 	    };
+	}
+
+	/** Sample without replacement. */
+	public static <E> List<E> choose(List<E> list, int n, long seed)
+	{
+	    if (n >= list.size()) 
+		throw new RuntimeException(
+			"asked for sample larger than list size");
+	    Random random = new Random(seed);
+	    Set<E> seen = new HashSet<E>(n);
+	    Set<Integer> seenIndices = new HashSet<Integer>(2 * n);
+	    List<E> r = new ArrayList<E>(n);
+	    while (r.size() < n) {
+		if (seenIndices.size() >= list.size())
+		    throw new RuntimeException(
+			    "not enough unique elements in list to create sample");
+		int i = random.nextInt(list.size());
+		seenIndices.add(i);
+
+		E e = list.get(i);
+		if (seen.contains(e))
+		    continue;
+		seen.add(e);
+		r.add(e);
+	    }
+	    return r;
 	}
 }
