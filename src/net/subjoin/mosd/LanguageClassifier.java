@@ -1,5 +1,7 @@
 package net.subjoin.mosd;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Iterator;
@@ -63,7 +65,6 @@ public class LanguageClassifier {
         	.put(".scala", "scala")
         	.put(".boo", "boo")
         	.put(".mf", "MetaFont")
-        	.put(".spec", "RPM Specfile")
         	.put(".sed", "sed")
         	.put(".groovy", "groovy")
         	.put(".m", ".m")
@@ -89,6 +90,7 @@ public class LanguageClassifier {
         	.put("GNUmakefile", "build")
         	.put(".make", "build")
         	.put("Imakefile", "build")
+        	.put(".spec", "build")
         	.put(".jam", "build")
         	.put(".guess", "build")
         	.put("configure", "build")
@@ -112,6 +114,7 @@ public class LanguageClassifier {
                 .put(".tex", "other")
                 .put(".info", "other")
                 .put(".texi", "other")
+                .put(".texinfo", "other")
                 .put("COPYING", "other")
                 .put("INSTALL", "other")
                 .put("TODO", "other")
@@ -187,6 +190,7 @@ public class LanguageClassifier {
                 .put("copyright", "other")
                 .put("control", "other")
                 .put("MANIFEST", "other")
+                .put("PORTING", "other")
                 .put("Change", "other")
                 .put(".cvsignore", "other")
                 .put(".gitignore", "other")
@@ -198,7 +202,7 @@ public class LanguageClassifier {
                 .put("FAQ", "other")
                 .put("FILES", "other")
                 .put(".elc", "other")	
-                .put(".string", "other")
+                .put(".strings", "other")
                 // huge test files from star
                 .put("8gb-1", "other")
                 .put("big", "other")
@@ -303,6 +307,28 @@ public class LanguageClassifier {
 	return f.toString();
     }
     
+
+    public String getLanuageClassification() {
+	int limit = Integer.MAX_VALUE - 1;
+	
+	Formatter f = new Formatter();
+	f.format("Languages by count\n");
+	for (Map.Entry<String, Long> e:
+	    _classCounts.getTopEntries(limit))
+	    f.format("%,16d %,16d %s\n", e.getValue(), 
+		    _classBytes.get(e.getKey()),
+		    e.getKey());
+	
+	f.format("\nLanguages by bytes\n");
+	for (Map.Entry<String, Long> e:
+	    _classBytes.getTopEntries(limit))
+	    f.format("%,16d %,16d %s\n",
+		    _classCounts.get(e.getKey()),
+		    e.getValue(), 
+		    e.getKey());
+	return f.toString();
+    }
+    
     public Collection<String> getUnknownExtensions()
     {
 	return _unknownExtensionCounts.keys();
@@ -349,5 +375,17 @@ public class LanguageClassifier {
        if (index < 0)
 	   return basename;
        return basename.substring(0, index);
+   }
+   
+   private static final Collection<String> EXCLUDED_LANGUAGES
+   	= Arrays.asList("build", "other", "sh");
+   public Collection<String> getLanguages() {
+       Collection<String> c = new ArrayList<String>(_classCounts.keys());
+       c.removeAll(EXCLUDED_LANGUAGES);
+       return c;
+   }
+
+   public int getLanguageCount() {
+       return getLanguages().size();
    }
 }
