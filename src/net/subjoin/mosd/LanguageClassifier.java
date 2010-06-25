@@ -311,6 +311,9 @@ public class LanguageClassifier {
     public String getLanuageClassification() {
 	int limit = Integer.MAX_VALUE - 1;
 	
+	System.out.format("%s files, %s bytes unknown\n",
+		ratio(_unknownExtensionCounts, _classCounts),
+		ratio(_unknownExtensionBytes, _classBytes));
 	Formatter f = new Formatter();
 	f.format("Languages by count\n");
 	for (Map.Entry<String, Long> e:

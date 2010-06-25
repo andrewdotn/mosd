@@ -346,7 +346,7 @@ public class Main {
 		    LanguageClassifier cl = new LanguageClassifier();
 		    cl.classify(sp.iterateSourceFiles());
 		    int languageCount = cl.getLanguageCount();
-		    System.out.format("%3d %s\n", languageCount, sp.getName());
+//		    System.out.format("%3d %s\n", languageCount, sp.getName());
 		    if (languageCount < 2)
 			continue;
 		    for (int i = 0; i < languageCount; i++)
