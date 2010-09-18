@@ -4,10 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 
 public class LanguageClassifier {
     
@@ -390,5 +397,21 @@ public class LanguageClassifier {
 
    public int getLanguageCount() {
        return getLanguages().size();
+   }
+   
+   public static void main(String... args) {
+       Map<String, List<String>> m2 = new HashMap<String, List<String>>();
+       for (Map.Entry<String, String> e: EXTENSION_MAP.entrySet()) {
+	   if (!m2.containsKey(e.getValue()))
+	       m2.put(e.getValue(), new ArrayList<String>());
+	   m2.get(e.getValue()).add(e.getKey());
+       }
+       
+       for (String s: m2.keySet()) {
+	   System.out.println(s + ": " + Joiner.on(", ").join(m2.get(s)));
+	}
+       
+       System.out.println("Hello, world!");
+       
    }
 }
