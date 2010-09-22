@@ -146,6 +146,24 @@ public class Main {
 		}
 		System.out.format("%d packages in cache\n", spl.size());
 		
+		boolean countMakeFilePackages = true;
+		if (countMakeFilePackages) {
+		    int count = 0;
+		    for (SourcePackage sp: spl) {
+			Iterator<DistributionFile> itdf = sp.iterateSourceFiles();
+			while (itdf.hasNext()) {
+			    DistributionFile df = itdf.next();
+			    String s = LanguageClassifier.getBasename(df.getPath());
+			    if (s.equals("Makefile") || s.equals("makefile") || s.equals("GNUMakefile")) {
+				count++;
+				break;
+			    }
+			}
+		    }
+		    System.out.format("%,d (%2.0f%%) contain Makefiles\n",
+			    count, 100. * count / spl.size());
+		}
+		
 		{
 		    int totalFiles = 0;
 		    long totalBytes = 0;
