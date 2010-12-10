@@ -351,10 +351,9 @@ public class Main {
 //		    System.out.println(cl.getLanuageClassification());
 //		}
 		
-		
 		{
+		int numml = 0;
 		List<SourcePackage> sample = new ArrayList<SourcePackage>();
-		// TODO: sort by name
 		List<String> packs = new ArrayList<String>();
 		for (SourcePackage sp: spl)
 		    packs.add(sp.getName());
@@ -367,9 +366,15 @@ public class Main {
 //		    System.out.format("%3d %s\n", languageCount, sp.getName());
 		    if (languageCount < 2)
 			continue;
+		    numml++;
 		    for (int i = 0; i < languageCount; i++)
 			sample.add(sp);
+		    
 		}
+		System.out.println(spl.size() + " packages, "
+			+ numml + " multi-language packages, "
+			+ sample.size() + " entries in sample.");
+
 		sample = Util.choose(sample, 200, "multi language systems".hashCode());
 		System.out.println("Sample:");
 		System.out.println("#!/bin/bash");
