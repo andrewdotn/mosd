@@ -392,6 +392,46 @@ public class Main {
 		}
 		}
 		
+		{
+		    System.out.println();
+		    System.out.println("evaluation");
+			int numml = 0;
+			List<SourcePackage> sample = new ArrayList<SourcePackage>();
+			List<String> packs = new ArrayList<String>();
+			for (SourcePackage sp: spl)
+			    packs.add(sp.getName());
+			Collections.sort(packs);
+			for (String s: packs) {
+			    SourcePackage sp = cache.get(s);
+			    LanguageClassifier cl = new LanguageClassifier();
+			    cl.classify(sp.iterateSourceFiles());
+			    int languageCount = cl.getLanguageCount();
+//			    System.out.format("%3d %s\n", languageCount, sp.getName());
+			    if (languageCount < 2)
+				continue;
+			    numml++;
+			    for (int i = 0; i < languageCount; i++)
+				sample.add(sp);
+			    
+			}
+			System.out.println(spl.size() + " packages, "
+				+ numml + " multi-language packages, "
+				+ sample.size() + " entries in sample.");
+
+			sample = Util.choose(sample, 15, "evaluation".hashCode());
+			int i = 0;
+			for (SourcePackage sp: sample) {
+			    i++;
+			    System.out.println("# " + sp.getName());
+			    String dir = String.format("%04d", i);
+			    System.out.format("rmdir %s\nmkdir %s\ncd %s\n", dir, dir, dir);
+			    for (DistributionFile df: sp.getFiles())
+				if (SourcePackage.isUpstreamFile(df))
+				    System.out.println("tar xf " + new File("..", df.getPath()));
+			    System.out.println("cd ..");
+			}
+		}
+		
 		if (!config.getBoolean(OPT_INTERACTIVE))
 		    return;
 		
