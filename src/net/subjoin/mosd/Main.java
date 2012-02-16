@@ -8,6 +8,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -42,6 +43,42 @@ public class Main {
     private static final String OPT_LANGCOUNT
     	= "show info for packages with this many languages";
     
+    public static Map<String, SourcePackage> loadCache(String path)
+    throws IOException
+    {
+	return loadCache(path, Integer.MAX_VALUE - 1);
+    }
+    
+    public static Map<String, SourcePackage> loadCache(String path, int maxEntries)
+    throws IOException
+    {
+	Map<String, SourcePackage> cache = Maps.newHashMap();
+
+	ObjectInputStream is = new ObjectInputStream(
+		new GZIPInputStream(
+			new BufferedInputStream(
+				new FileInputStream(path))));
+	cache = Maps.newHashMap();
+	int i = 0;
+	try {
+	    while (i++ < maxEntries) {
+		try {
+		    SourcePackage sp = (SourcePackage)is.readObject();
+		    cache.put(sp.getName(), sp);
+		} catch (EOFException e) {
+		    // there’s no method to check if end-of-file
+		    // has been reached, unfortunately. 
+		    break;
+		}
+	    }
+	} catch (ClassNotFoundException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    is.close();
+	}
+	return cache;
+    }
+    
 	public static void main(String[] args)
 	throws Exception
 	{
@@ -62,89 +99,34 @@ public class Main {
 	    if (jsap.messagePrinted())
 		System.exit(1);
 	    
-		UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
-		
-//		System.out.println("The distribution at " + ub.getPath());
-//		
-//		System.out.println("has source package metadata files at:");	
-//		for (Object o: ub.getSourcePackageMetadataFiles())
-//			System.out.println("\t" + o);
-//
-//		System.out.println("and binary package metadata files at:");
-//		for (Object o: ub.getBinaryPackageMetadataFiles())
-//			System.out.println("\t" + o);
-//		
-		System.out.print("I know about "
-				+ ub.getSourcePackages().size()
-				+ " source packages ");
-		
-		{
+	    UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
+
+	    Map<String, SourcePackage> cache = ImmutableMap.of();
+	    File cacheFile = new File("tasty.cache.gz");
+	    if (cacheFile.exists()) {
+		cache = loadCache(cacheFile.getPath(),
+			config.getInt(OPT_SLICE, Integer.MAX_VALUE - 1));
+	    }
+
+	    List<SourcePackage> spl = new ArrayList<SourcePackage>();
+	    for (SourcePackage sp: cache.values())
+		spl.add(sp);
+	    System.out.format("%d packages in cache\n", spl.size());
+
+
+	    System.out.print("I know about "
+		    + ub.getSourcePackages().size()
+		    + " source packages ");
+	
+	    {
 		long totalBytes = 0;
 		for (SourcePackage sp: ub.getSourcePackages()) {
 		    for (DistributionFile f: sp.getFiles())
 			totalBytes += f.getSize();
 		}
 		System.out.format("totalling %,d bytes%n", totalBytes);
-		}
-		
+	    }
 
-//		{
-//		    SourcePackage sp = ub.getSourcePackages().get(0);
-//		    List<DistributionFile> files = sp.getFiles();
-//		    for (DistributionFile df: files) {
-//			System.out.print("It has file " + df.getPath());
-//			if (new File(df.getPath()).exists()) {
-//			    System.out.println(" which has files " + 
-//				    Arrays.toString(ArchiveInspector.getContents(
-//					    df.getPath())));
-//			} else {
-//			    System.out.println(" .. which we don’t have a copy of.");
-//			}
-//		    }
-//		}
-		
-		File cacheFile = new File("tasty.cache.gz");
-		Map<String, SourcePackage> cache = ImmutableMap.of();
-
-		int limit = config.getInt(OPT_SLICE, Integer.MAX_VALUE - 1);
-		if (cacheFile.exists()) {
-        		ObjectInputStream is = new ObjectInputStream(
-				new GZIPInputStream(
-        			new BufferedInputStream(
-        				new FileInputStream(cacheFile))));
-        		cache = Maps.newHashMap();
-        		int i = 0;
-        		while (i++ < limit) {
-        		    try {
-                		    SourcePackage sp = (SourcePackage)is.readObject();
-                		    cache.put(sp.getName(), sp);
-                		    
-                		    if (config.contains(OPT_FIND)) {
-                			findFiles(sp, config.getString(OPT_FIND));
-                		    }
-        		    } catch (EOFException e) {
-        			// there’s no method to check if end-of-file
-        			// has been reached, unfortunately. 
-        			break;
-        		    }
-        		}
-        		is.close();
-		}
-		
-		List<SourcePackage> spl = new ArrayList<SourcePackage>();
-//			ub.getSourcePackages());
-//		
-		if (cacheFile.exists()) {
-//        		for (int i = 0; i < spl.size(); i++) {
-//        		    String name = spl.get(i).getName();
-//        		    SourcePackage sp = cache.get(name);
-//        		    if (sp != null)
-//        			spl.set(i, sp);
-//        		}
-		    for (SourcePackage sp: cache.values())
-			spl.add(sp);
-		}
-		System.out.format("%d packages in cache\n", spl.size());
 		
 		boolean countMakeFilePackages = true;
 		if (countMakeFilePackages) {
