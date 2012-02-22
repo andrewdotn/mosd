@@ -274,6 +274,19 @@ public class LanguageClassifier {
 	    return category;
     }
     
+    
+    public String getDfExtension(DistributionFile df) {
+        String extension = getExtension(df.getPath());
+        String doubleExtension = null;
+
+        if (extension.equals(".in")
+ 	       || extension.equals(".bz2") || extension.equals(".gz")) {
+ 	   doubleExtension = getDoubleExtension(df.getPath());
+ 	   extension = stripExtension(doubleExtension);
+        }
+        return extension;
+    }
+    
     public String getTopUnknown() {
 	return getTopUnknown(10);
     }

@@ -107,12 +107,43 @@ public class Main {
 		cache = loadCache(cacheFile.getPath(),
 			config.getInt(OPT_SLICE, Integer.MAX_VALUE - 1));
 	    }
+	    
+	    if (config.getBoolean(OPT_WRITE_CACHE)) {
+		System.out.println("Writing new cache...\n");
+		long totalBytes = 0;
+		long totalFiles = 0;
+		int i = 0;
+		File newCacheFile = new File(cacheFile.getName() + ".new");
+		ObjectOutputStream os = new ObjectOutputStream(
+			new BufferedOutputStream(
+				new GZIPOutputStream(
+					new FileOutputStream(newCacheFile))));
+		for (SourcePackage sp: ub.getSourcePackages()) {
+		    try {
+			if (cache.containsKey(sp.getName()))
+			    sp = cache.get(sp.getName());
+
+			totalBytes += sp.getUncompressedBytes();
+			totalFiles += sp.getUncompressedFileCount();
+
+			os.writeObject(sp);
+		    } catch (RuntimeException e) {
+			System.err.println(e);
+		    }
+
+		    i++;
+		}
+		System.out.format("total %,d files, %,d bytes uncompressed",
+			totalFiles, totalBytes);
+		os.close();
+		if (!newCacheFile.renameTo(cacheFile))
+		    throw new RuntimeException("couldn’t rename file");
+	    }
 
 	    List<SourcePackage> spl = new ArrayList<SourcePackage>();
 	    for (SourcePackage sp: cache.values())
 		spl.add(sp);
 	    System.out.format("%d packages in cache\n", spl.size());
-
 
 	    System.out.print("I know about "
 		    + ub.getSourcePackages().size()
@@ -238,42 +269,7 @@ public class Main {
 //			System.out.format(", %s (%2.0f%%)", s, 100. * cl.counts.count(s) / knownFiles);
 //		    System.out.println();
 //		}
-		
-		if (config.getBoolean(OPT_WRITE_CACHE)) {
-		    System.out.println("Writing new cache...\n");
-		    long totalBytes = 0;
-        		long totalFiles = 0;
-        		int i = 0;
-        		File newCacheFile = new File(cacheFile.getName() + ".new");
-        		ObjectOutputStream os = new ObjectOutputStream(
-        			new BufferedOutputStream(
-        				new GZIPOutputStream(
-        				new FileOutputStream(newCacheFile))));
-        		for (SourcePackage sp: ub.getSourcePackages()) {
-        		    try {
-        			if (cache.containsKey(sp.getName()))
-        			    sp = cache.get(sp.getName());
-        			
-        			totalBytes += sp.getUncompressedBytes();
-        			totalFiles += sp.getUncompressedFileCount();
-        			
-        			os.writeObject(sp);
-        		    } catch (RuntimeException e) {
-        			System.err.println(e);
-        		    }
-        		    
-        //		    System.out.format("%s %d/%d, %s files, %s bytes\n",
-        //			    sp.getName(), i + 1, spl.size(),
-        //			    nf.format(totalFiles),
-        //			    nf.format(totalBytes));
-        		    i++;
-        		}
-        		System.out.format("total %,d files, %,d bytes uncompressed",
-        			totalFiles, totalBytes);
-        		os.close();
-        		if (!newCacheFile.renameTo(cacheFile))
-        		    throw new RuntimeException("couldn’t rename file");
-		}
+
 		
 //		List<Entry<String, Integer>> langcounts = Lists.newArrayList();
 //		for (SourcePackage sp: spl) {
@@ -400,7 +396,7 @@ public class Main {
 				+ numml + " multi-language packages, "
 				+ sample.size() + " entries in sample.");
 
-			sample = Util.choose(sample, 15, "evaluation".hashCode());
+			sample = Util.choose(sample, 20, "multi language systems".hashCode());
 			int i = 0;
 			for (SourcePackage sp: sample) {
 			    i++;
