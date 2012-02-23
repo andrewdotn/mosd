@@ -4,10 +4,15 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.Map;
+
+import javax.management.RuntimeErrorException;
 
 /* horrible hack—classloader stuff means analyzer class has to end in “Analyzer” */
 public class ReloaderDriver {
@@ -21,18 +26,26 @@ public class ReloaderDriver {
     {
 	long timestamp = System.currentTimeMillis();
 	UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
-	Map<String, SourcePackage> sp = Main.loadCache("tasty.cache.gz");
+	Map<String, SourcePackage> sp
+		= null;
+		// = Main.loadCache("tasty.cache.gz");
 	System.out.format("%,d millis\n", System.currentTimeMillis() - timestamp);
 	System.out.println("ready");
 	BufferedReader reader = new BufferedReader(
 		new InputStreamReader(System.in));
 	String line;
+	String lastClass = null;
 	while ((line = reader.readLine()) != null) {
-	    Class<?> c = new Reloader().loadClass(
-		    Reloader.class.getPackage().getName() + "."
-		    + line.trim());
+	    if (line.trim().length() == 0 && lastClass != null) {
+		line = lastClass;
+		System.out.println(lastClass);
+	    }
+	    lastClass = line;
 	    
 	    try {
+		Class<?> c = new Reloader().loadClass(
+			Reloader.class.getPackage().getName() + ".reload."
+			+ line.trim());
 		timestamp = System.currentTimeMillis();
 		c.getConstructor(UbuntuDistribution.class,
 			Map.class).newInstance(ub, sp);
@@ -62,23 +75,23 @@ class Reloader extends ClassLoader {
 
     @Override
     public Class<?> findClass(String s) {
-	if (s.startsWith(ReloaderDriver.class.getPackage().getName() + ".")
-		&& !s.endsWith("Analyzer"))
-	{
-	    try {
-		return super.loadClass(s);
-	    } catch (ClassNotFoundException e) {
-		throw new RuntimeException(e);
-	    }
-	}
-	    
+        if (!s.startsWith(ReloaderDriver.class.getPackage().getName() + ".reload."))
+        {
+            try {
+                return super.loadClass(s);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+            
         try {
             byte[] bytes = loadClassData(s);
             return defineClass(s, bytes, 0, bytes.length);
         } catch (IOException ioe) {
             try {
-                return super.loadClass(s);
-            } catch (ClassNotFoundException ignore) { }
+        	return super.loadClass(s);
+            } catch (ClassNotFoundException e) {
+            }
             ioe.printStackTrace(System.out);
             return null;
         }

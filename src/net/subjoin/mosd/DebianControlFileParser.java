@@ -8,8 +8,12 @@ public class DebianControlFileParser
 extends AbstractRecDescentParser
 implements Iterable<DebianControlFile>
 {
-	public DebianControlFileParser(String string) {
-		init(string);
+    	private DebianControlFileParser(String string) {
+    	    init(string);
+    	}
+    	
+	public static DebianControlFileParser fromString(String string) {
+	    return new DebianControlFileParser(string);
 	}
 	
 	public DebianControlFileParser(File file)

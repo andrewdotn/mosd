@@ -1,4 +1,4 @@
-package net.subjoin.mosd;
+package net.subjoin.mosd.reload;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class FilenameAnalyzer {
+import net.subjoin.mosd.DistributionFile;
+import net.subjoin.mosd.LanguageClassifier;
+import net.subjoin.mosd.Main;
+import net.subjoin.mosd.Reloadable;
+import net.subjoin.mosd.SourcePackage;
+import net.subjoin.mosd.UbuntuDistribution;
+import net.subjoin.mosd.Util;
+
+public class FilenameAnalyzer
+{
     
     private UbuntuDistribution _ub; 
     private Map<String, SourcePackage> _spl;
@@ -23,7 +32,10 @@ public class FilenameAnalyzer {
     {
 	_ub = ub;
 	_spl = sp;
-	autoconfStats();
+	// autoconfStats();
+	
+	System.out.println(ub.getReleaseName());
+	
     }
     
     public static void main(String... args)

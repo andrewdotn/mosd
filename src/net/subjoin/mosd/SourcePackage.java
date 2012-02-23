@@ -23,7 +23,7 @@ implements Serializable
     private transient int _uncompressedFileCount;
     private transient long _uncompressedBytes;
     
-    SourcePackage(DebianControlFile dsc)
+    public SourcePackage(DebianControlFile dsc)
     {
 	_name = dsc.getKey("Package");
 	_files = ImmutableList.copyOf(dsc.getFiles());

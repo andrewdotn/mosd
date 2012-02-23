@@ -13,7 +13,7 @@ public class DebianControlFileTest {
     throws IOException
     {
 	String packages1 = Util.getTestFileAsString("filetest.txt");
-	DebianControlFileParser p = new DebianControlFileParser(packages1);
+	DebianControlFileParser p = DebianControlFileParser.fromString(packages1);
 	DebianControlFile dcs1 = p.controlFile();
 
 	{

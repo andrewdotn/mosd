@@ -13,7 +13,7 @@ public class DebianControlFileParserTest {
     throws IOException
     {
 	String packages1 = Util.getTestFileAsString("package1.txt");
-	DebianControlFileParser p = new DebianControlFileParser(packages1);
+	DebianControlFileParser p = DebianControlFileParser.fromString(packages1);
 	DebianControlFile dcs = p.controlFile();
 	
 	assertEquals(3, dcs.entryCount());
@@ -32,7 +32,7 @@ public class DebianControlFileParserTest {
     throws IOException
     {
 	String packages1 = Util.getTestFileAsString("packages1.txt");
-	DebianControlFileParser p = new DebianControlFileParser(packages1);
+	DebianControlFileParser p = DebianControlFileParser.fromString(packages1);
 	
 	int i = 0;
 	for (DebianControlFile dcs: p) {
