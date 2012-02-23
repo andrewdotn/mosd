@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.subjoin.mosd.DebianControlFile;
 import net.subjoin.mosd.DebianControlFileParser;
@@ -16,10 +18,8 @@ import net.subjoin.mosd.SourcePackage;
 import net.subjoin.mosd.UbuntuDistribution;
 
 import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
+import com.google.common.collect.Sets;
 
 public class ReleasePackageAnalyzer {
     private UbuntuDistribution _ub; 
@@ -73,21 +73,27 @@ public class ReleasePackageAnalyzer {
     throws Exception
     {
 	Multiset<Integer> hist = HashMultiset.create();
+	Set<String> allBinaryPackages = Sets.newHashSet();
 	final Map<String, Integer> bigPackages = new HashMap<String, Integer>(); 
 	int total = 0;
 	for (DistributionFile df: dfs) {
 	    DebianControlFileParser p = new DebianControlFileParser(
 		    new File(df.getPath()));
 	    for (DebianControlFile dsc: p) {
-		int binaryCount =  dsc.getKey("Binary").split(",").length;
+		String[] packages = dsc.getKey("Binary").split(",");
+		int binaryCount =  packages.length;
 		total += binaryCount;
 		hist.add(binaryCount);
+		for (String name: packages) {
+		    allBinaryPackages.add(name.trim());
+		}
 		if (binaryCount > 30) {
 		    bigPackages.put(dsc.getKey("Package"), binaryCount);
 		}
 	    }
 	}
 	System.out.println(total + " total");
+	System.out.println(allBinaryPackages.size() + " unique");
 	System.out.println(hist);
 	
 	ArrayList<String> names = new ArrayList<String>(bigPackages.keySet());
