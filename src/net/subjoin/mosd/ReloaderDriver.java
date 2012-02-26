@@ -27,8 +27,8 @@ public class ReloaderDriver {
 	long timestamp = System.currentTimeMillis();
 	UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
 	Map<String, SourcePackage> sp
-		= null;
-		// = Main.loadCache("tasty.cache.gz");
+		// = null;
+		= Main.loadCache("tasty.cache.gz");
 	System.out.format("%,d millis\n", System.currentTimeMillis() - timestamp);
 	System.out.println("ready");
 	BufferedReader reader = new BufferedReader(
