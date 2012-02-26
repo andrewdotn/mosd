@@ -34,7 +34,7 @@ public class FilenameAnalyzer
 	// autoconfStats();
 	
 	System.out.println(ub.getReleaseName());
-	
+	buildSample();
     }
     
     public static void main(String... args)
