@@ -9,12 +9,10 @@ import net.subjoin.mosd.UbuntuDistribution;
 public class TopUnknown
 {
     
-    private UbuntuDistribution _ub; 
     private Map<String, SourcePackage> _spl;
     
     public TopUnknown(UbuntuDistribution ub, Map<String, SourcePackage> sp)
     {
-	_ub = ub;
 	_spl = sp;
 	
 	LanguageClassifier cl = new LanguageClassifier();

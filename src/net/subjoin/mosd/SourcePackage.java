@@ -33,7 +33,7 @@ implements Serializable
     public SourcePackage(String name, DistributionFile... files)
     {
 	_name = name;
-	_files = ImmutableList.of(files);
+	_files = ImmutableList.copyOf(files);
 	_walked = false;
     }
     
@@ -129,7 +129,7 @@ implements Serializable
 	DistributionFile[] files = new DistributionFile[numfiles];
 	for (int i = 0; i < numfiles; i++)
 	    files[i] = readDf(in);
-	_files = ImmutableList.of(files);
+	_files = ImmutableList.copyOf(files);
 
 	_walked = false;
     }

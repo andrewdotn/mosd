@@ -17,19 +17,16 @@ import net.subjoin.mosd.Util;
 public class FilenameAnalyzer
 {
     
-    private UbuntuDistribution _ub; 
     private Map<String, SourcePackage> _spl;
     
     public FilenameAnalyzer()
     throws Exception
     {
-	_ub = new UbuntuDistribution("../ubuntu", "karmic");
 	_spl = Main.loadCache("tasty.cache.gz"); 
     }
     
     public FilenameAnalyzer(UbuntuDistribution ub, Map<String, SourcePackage> sp)
     {
-	_ub = ub;
 	_spl = sp;
 	// autoconfStats();
 	

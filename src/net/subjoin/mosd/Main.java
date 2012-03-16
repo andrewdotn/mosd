@@ -20,11 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.martiansoftware.jsap.FlaggedOption;
@@ -452,16 +450,4 @@ public class Main {
 		}
 	}
 
-	private static void findFiles(SourcePackage sp, String string) {
-	    Pattern p = Pattern.compile(string);
-	    Iterator<DistributionFile> itdf = sp.iterateSourceFiles();
-	    while (itdf.hasNext()) {
-		DistributionFile df = itdf.next();
-		if (p.matcher(df.getPath()).matches()) {
-		    String[] fullPath = df.getFullPath();
-		    System.out.format("%,12d %s\n", df.getSize(),
-			    Joiner.on(" ").join(Arrays.copyOfRange(fullPath, 0, fullPath.length))); 
-		}
-	    }
-	}
 }

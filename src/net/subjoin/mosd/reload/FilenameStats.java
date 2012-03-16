@@ -11,25 +11,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
-import com.google.common.collect.Multiset.Entry;
-import com.sun.media.jai.rmi.HashSetState;
-
 import net.subjoin.mosd.DistributionFile;
 import net.subjoin.mosd.SourcePackage;
 import net.subjoin.mosd.UbuntuDistribution;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multiset.Entry;
+
 public class FilenameStats
 {
     
-    private UbuntuDistribution _ub; 
     private Map<String, SourcePackage> _spl;
     
     public FilenameStats(UbuntuDistribution ub, Map<String, SourcePackage> sp)
     {
-	_ub = ub;
 	_spl = sp;
 	doit();
     }

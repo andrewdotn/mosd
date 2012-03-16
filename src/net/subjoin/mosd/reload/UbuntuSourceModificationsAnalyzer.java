@@ -2,7 +2,6 @@ package net.subjoin.mosd.reload;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,16 +16,14 @@ public class UbuntuSourceModificationsAnalyzer {
 
     private static final Pattern RE_UBUNTU_MODIFIED_PACKAGE
     	= Pattern.compile("ubuntu[0-9]*\\.tar\\.gz$");
-    private static final Pattern RE_U
-	= Pattern.compile("u[0-9]*\\.tar\\.gz$");
     
-    private UbuntuDistribution _ub; 
+    // private UbuntuDistribution _ub; 
     private Map<String, SourcePackage> _spl;
     
     public UbuntuSourceModificationsAnalyzer(UbuntuDistribution ub, Map<String, SourcePackage> spl)
     throws Exception
     {
-	_ub = ub;
+	// _ub = ub;
 	_spl = spl;
 	doit();
     }
@@ -46,7 +43,6 @@ public class UbuntuSourceModificationsAnalyzer {
 		count++;
 		
 		Matcher m1 = RE_UBUNTU_MODIFIED_PACKAGE.matcher(df.getPath());
-		Matcher m2 = RE_U.matcher(df.getPath());
 		if (m1.find()) {
 		    found.add(new File(df.getPath()).getName());
 		    countNonOrigTarGz++;

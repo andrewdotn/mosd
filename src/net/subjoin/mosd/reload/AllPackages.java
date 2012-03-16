@@ -11,12 +11,11 @@ import net.subjoin.mosd.UbuntuDistribution;
 public class AllPackages
 {
     
-    private UbuntuDistribution _ub; 
+    // private UbuntuDistribution _ub; 
     private Map<String, SourcePackage> _spl;
     
     public AllPackages(UbuntuDistribution ub, Map<String, SourcePackage> sp)
     {
-	_ub = ub;
 	_spl = sp;
 	
 	List<String> packages = new ArrayList<String>();

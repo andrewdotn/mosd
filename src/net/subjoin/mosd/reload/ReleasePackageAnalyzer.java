@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,13 +22,11 @@ import com.google.common.collect.Sets;
 
 public class ReleasePackageAnalyzer {
     private UbuntuDistribution _ub; 
-    private Map<String, SourcePackage> _spl;
     
     public ReleasePackageAnalyzer(UbuntuDistribution ub, Map<String, SourcePackage> spl)
     throws Exception
     {
 	_ub = ub;
-	_spl = spl;
 	doit();
     }
     

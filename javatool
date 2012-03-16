@@ -11,8 +11,8 @@ classpath=""
 for lib in \
     bin \
     external/junit-4.8.2.jar \
-    external/google-collect-1.0.jar \
     external/JSAP-2.1.jar \
+    external/guava-11.0.2.jar \
     ;
 do
     classpath="${classpath}:${DIR}/${lib}"
