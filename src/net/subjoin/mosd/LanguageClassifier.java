@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 public class LanguageClassifier {
     
@@ -402,6 +403,16 @@ public class LanguageClassifier {
        Collection<String> c = new ArrayList<String>(_classCounts.keys());
        c.removeAll(EXCLUDED_LANGUAGES);
        return c;
+   }
+   
+   public Map<String, Integer> getLanguagesWithFileCounts() {
+       Collection<String> c = new ArrayList<String>(_classCounts.keys());
+       c.removeAll(EXCLUDED_LANGUAGES);
+       Map<String, Integer> m = Maps.newHashMap();
+       for (String s: c) {
+	   m.put(s, (int)_classCounts.get(s));
+       }
+       return m;
    }
 
    public int getLanguageCount() {

@@ -104,7 +104,11 @@ public class FilenameAnalyzer
 	}
     }
     
-    public List<SourcePackage> buildSample() {	
+    public List<SourcePackage> buildSample() {
+	return buildSample(true);
+    }
+    
+    public List<SourcePackage> buildSample(boolean printStuff) {	
 	int numml = 0;
 	List<SourcePackage> sample = new ArrayList<SourcePackage>();
 	List<String> names= new ArrayList<String>();
@@ -122,18 +126,22 @@ public class FilenameAnalyzer
 	    for (int i = 0; i < languageCount; i++)
 		sample.add(sp);
 	}
-	System.out.println(_spl.size() + " packages, "
-		+ numml + " multi-language packages, "
-		+ sample.size() + " entries in sample.");
+	if (printStuff) {
+	    System.out.println(_spl.size() + " packages, "
+		    + numml + " multi-language packages, "
+		    + sample.size() + " entries in sample.");
+	}
 
 	sample = Util.choose(sample, 18, "multi language systems".hashCode());
 	System.out.println("Sample:");
-	
+
 	List<String> ret = new ArrayList<String>();
 	for (SourcePackage sp: sample)
 	    ret.add(sp.getName());
-	
-	System.out.println(Arrays.toString(ret.toArray()));
+
+	if (printStuff) {
+	    System.out.println(Arrays.toString(ret.toArray()));
+	}
 
 	return sample;
     }
