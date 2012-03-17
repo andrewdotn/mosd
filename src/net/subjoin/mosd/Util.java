@@ -116,7 +116,7 @@ public class Util {
 	/** Sample without replacement. */
 	public static <E> List<E> choose(List<E> list, int n, long seed)
 	{
-	    if (n >= list.size()) 
+	    if (n > list.size()) 
 		throw new RuntimeException(
 			"asked for sample larger than list size");
 	    Random random = new Random(seed);
