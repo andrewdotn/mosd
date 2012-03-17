@@ -64,6 +64,9 @@ public class WeightedSampleProperties {
 		counts.add(languageCount.get(s));
 	    }
 	    fw.append(Joiner.on(", ").join(counts) + "\n");
+	    
+	    fw.append(Joiner.on(",").join(sample) + "\n");
+	    
 	    fw.close();
 	    System.out.println("data written to " + output.getAbsolutePath());
 	} catch (Exception e) {
