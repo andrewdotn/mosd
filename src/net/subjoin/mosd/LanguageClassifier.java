@@ -276,7 +276,7 @@ public class LanguageClassifier {
     }
     
     
-    public String getDfExtension(DistributionFile df) {
+    public static String getDfExtension(DistributionFile df) {
         String extension = getExtension(df.getPath());
         String doubleExtension = null;
 
