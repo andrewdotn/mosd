@@ -57,7 +57,7 @@ public class FilenameAnalyzer
 		boolean has_am = false;
 		while (it.hasNext() && !(has_ac && has_am)) {
 		    DistributionFile df = it.next();
-		    String ext = cl.getDfExtension(df);
+		    String ext = LanguageClassifier.getDfExtension(df);
 		    if (ext.equals(".ac"))
 			has_ac = true;
 		    if (ext.equals(".am"))
