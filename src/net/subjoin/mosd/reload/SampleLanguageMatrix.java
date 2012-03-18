@@ -1,7 +1,11 @@
 package net.subjoin.mosd.reload;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +23,7 @@ public class SampleLanguageMatrix {
     public SampleLanguageMatrix(UbuntuDistribution ub, Map<String, SourcePackage> spl)
     {
 	FilenameAnalyzer fa = new FilenameAnalyzer(ub, spl);
-	List<SourcePackage> sampleSystems = fa.buildSample(false);
+	List<SourcePackage> sampleSystems = fa.buildSample(false, 103);
 	
 	Map<String, Map<String, Integer>> counts = Maps.newHashMap();
 	Set<String> langSet = Sets.newHashSet(); 
@@ -36,14 +40,23 @@ public class SampleLanguageMatrix {
 	    sampleNames.add(sp.getName());
 	
 	List<String> langs = new ArrayList<String>(langSet);
-	Collections.sort(langs);
+	Collections.sort(langs, new Comparator<String>() {
+	    private String transform(String s) {
+		return s.toLowerCase().replace(".", "");
+	    }
+	    
+	    public @Override int compare(String s1, String s2) {
+		return transform(s1).compareTo(transform(s2));
+	    }
+	});
 	List<String> printLangs = new ArrayList<String>(langs);
 	for (int i = 0; i< printLangs.size(); i++) {
 	    printLangs.set(i, "\"" + printLangs.get(i) + "\"");
 	}
 	
 	{
-	    System.out.println("{");
+	    StringBuilder retSb = new StringBuilder();
+	    retSb.append("{\n");
 	    List<String> parts = new ArrayList<String>();
 	    parts.add("{\"Package\", " + Joiner.on(", ").join(printLangs) + "}");
 	    for (SourcePackage sp: sampleSystems) {
@@ -58,8 +71,19 @@ public class SampleLanguageMatrix {
 		parts.add(sb.toString());
 	    }
 
-	    System.out.println(Joiner.on(",\n").join(parts));
-	    System.out.println("}");
+	    retSb.append(Joiner.on(",\n").join(parts));
+	    retSb.append("}\n");
+	    String ret = retSb.toString();
+	    System.out.println(ret);
+	    try {
+		File out = new File("SampleLanguageMatrix.m");
+		FileWriter writer = new FileWriter(out);
+		writer.write(ret);
+		writer.close();
+		System.out.println("Written to " + out.getAbsolutePath());
+	    } catch (IOException e) {
+		throw new RuntimeException(e);
+	    }
 	}
 	
 	System.out.println();

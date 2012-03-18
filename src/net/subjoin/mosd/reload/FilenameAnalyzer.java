@@ -105,10 +105,10 @@ public class FilenameAnalyzer
     }
     
     public List<SourcePackage> buildSample() {
-	return buildSample(true);
+	return buildSample(true, 18);
     }
     
-    public List<SourcePackage> buildSample(boolean printStuff) {	
+    public List<SourcePackage> buildSample(boolean printStuff, int count) {	
 	int numml = 0;
 	List<SourcePackage> sample = new ArrayList<SourcePackage>();
 	List<String> names= new ArrayList<String>();
@@ -132,7 +132,7 @@ public class FilenameAnalyzer
 		    + sample.size() + " entries in sample.");
 	}
 
-	sample = Util.choose(sample, 18, "multi language systems".hashCode());
+	sample = Util.choose(sample, count, "multi language systems".hashCode());
 	System.out.println("Sample:");
 
 	List<String> ret = new ArrayList<String>();

@@ -7,9 +7,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /* horrible hack—classloader stuff means analyzer class has to end in “Analyzer” */
 public class ReloaderDriver {
+    
+    private static Pattern CLASS_NAME = Pattern.compile("^[A-Za-z.]*$");
+    
     public ReloaderDriver()
     throws Exception
     {
@@ -35,6 +39,11 @@ public class ReloaderDriver {
 		System.out.println(lastClass);
 	    }
 	    lastClass = line;
+	    
+	    if (!CLASS_NAME.matcher(line.trim()).matches()) {
+		System.err.println(line + " probably isn’t a class name");
+		continue;
+	    }
 	    
 	    try {
 		Class<?> c = new Reloader().loadClass(
