@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/Users/andrew/Documents/msc/mosd/jni/mosd_jni.jar">
+	<classpathentry kind="lib" path="jni/mosd_jni.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="mosd/jni"/>
 		</attributes>

@@ -1,10 +1,13 @@
 SHELL = /bin/bash -eu
 
-CFLAGS = -W -Wall -Wextra -Wformat=2 -MD \
-	 -I/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Headers \
-	 -I/opt/local/include \
-	 -g3 -O3
-LDFLAGS = -L/opt/local/lib -lmagic -larchive
+LIBARCHIVE ?= /opt/homebrew/opt/libarchive
+
+CFLAGS := -W -Wall -Wextra -Wformat=2 -MD \
+	  -I$(shell /usr/libexec/java_home)/include \
+	  -I$(shell /usr/libexec/java_home)/include/darwin \
+	  -I$(LIBARCHIVE)/include \
+	  -g3 -O3
+LDFLAGS = -L$(LIBARCHIVE)/lib -larchive
 
 SRCS = \
        arinspect.c \

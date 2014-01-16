@@ -2,3 +2,13 @@ syntax: glob
 
 notes.txt
 todo.txt
+
+bin
+
+external/*.jar
+external/*.zip
+
+*.jnilib
+jni/*.d
+jni/testprog
+jni/*.jar
