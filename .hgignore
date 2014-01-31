@@ -8,6 +8,7 @@ bin
 
 external/*.jar
 external/*.zip
+external/libarchive*
 
 *.jnilib
 jni/*.d

@@ -1,6 +1,7 @@
 SHELL = /bin/bash -eu
 
-LIBARCHIVE ?= /opt/homebrew/opt/libarchive
+PWD = $(dir $(lastword $(MAKEFILE_LIST)))
+LIBARCHIVE = $(PWD)/../external/libarchive-2.8.3-install
 
 CFLAGS := -W -Wall -Wextra -Wformat=2 -MD \
 	  -I$(shell /usr/libexec/java_home)/include \
