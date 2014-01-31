@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -108,31 +111,54 @@ public class Main {
 	    
 	    if (config.getBoolean(OPT_WRITE_CACHE)) {
 		System.out.println("Writing new cache...\n");
-		long totalBytes = 0;
-		long totalFiles = 0;
+		final AtomicLong totalBytes = new AtomicLong(0);
+		final AtomicLong totalFiles = new AtomicLong(0);
 		int i = 0;
 		File newCacheFile = new File(cacheFile.getName() + ".new");
-		ObjectOutputStream os = new ObjectOutputStream(
+		final ObjectOutputStream os = new ObjectOutputStream(
 			new BufferedOutputStream(
 				new GZIPOutputStream(
 					new FileOutputStream(newCacheFile))));
+
+		ForkJoinPool pool = new ForkJoinPool();
+		final CountDownLatch latch
+			= new CountDownLatch(ub.getSourcePackages().size());
+
 		for (SourcePackage sp: ub.getSourcePackages()) {
 		    try {
 			if (cache.containsKey(sp.getName()))
 			    sp = cache.get(sp.getName());
 
-			totalBytes += sp.getUncompressedBytes();
-			totalFiles += sp.getUncompressedFileCount();
+			final SourcePackage thisSp = sp;
+			pool.submit(new Runnable() {
+			    public @Override void run() {
+				totalBytes.addAndGet(
+					thisSp.getUncompressedBytes());
+				totalFiles.addAndGet(
+					thisSp.getUncompressedFileCount());
+				latch.countDown();
 
-			os.writeObject(sp);
+				synchronized (os) {
+				    try {
+					os.writeObject(thisSp);
+				    } catch (IOException e) {
+					throw new RuntimeException(e);
+				    }
+				}
+			    }
+			});
+
 		    } catch (RuntimeException e) {
 			System.err.println(e);
 		    }
 
 		    i++;
 		}
+		latch.await();
+		pool.shutdown();
+
 		System.out.format("total %,d files, %,d bytes uncompressed",
-			totalFiles, totalBytes);
+			totalFiles.get(), totalBytes.get());
 		os.close();
 		if (!newCacheFile.renameTo(cacheFile))
 		    throw new RuntimeException("couldn’t rename file");
