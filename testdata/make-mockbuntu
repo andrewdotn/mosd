@@ -2,6 +2,9 @@
 
 set -eu
 
+DIR="$(dirname -- "${0}")"
+cd "${DIR}"
+
 filesize() {
         if ! [ -f "${1}" ]; then
             exit 1

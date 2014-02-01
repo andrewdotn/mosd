@@ -1,5 +1,7 @@
 syntax: glob
 
+README.html
+
 files
 notes.txt
 todo.txt
@@ -14,3 +16,6 @@ external/libarchive*
 jni/*.d
 jni/testprog
 jni/*.jar
+jni/net_*.h
+
+testdata/mockbuntu
