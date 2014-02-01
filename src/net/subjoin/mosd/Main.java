@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -124,7 +125,23 @@ public class Main {
 		final CountDownLatch latch
 			= new CountDownLatch(ub.getSourcePackages().size());
 
-		for (SourcePackage sp: ub.getSourcePackages()) {
+		// Sort by descending size to avoid stragglers
+		List<SourcePackage> packageList
+			= new ArrayList<>(ub.getSourcePackages());
+		Collections.sort(packageList, new Comparator<SourcePackage>() {
+		    @Override
+                    public int compare(SourcePackage o1, SourcePackage o2) {
+                	long s1 = o1.getCompressedBytes();
+                	long s2 = o2.getCompressedBytes();
+                	if (s1 > s2)
+                	    return -1;
+                	else if (s1 == s2)
+                	    return 0;
+                	return 1;
+                    }
+		});
+
+		for (SourcePackage sp: packageList) {
 		    try {
 			if (cache.containsKey(sp.getName()))
 			    sp = cache.get(sp.getName());

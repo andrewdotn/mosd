@@ -51,6 +51,14 @@ implements Serializable
 	return _uncompressedFileCount;
     }
     
+    public long getCompressedBytes() {
+	long ret = 0;
+	for (DistributionFile df: _files) {
+	    ret += df.getSize();
+	}
+	return ret;
+    }
+
     private void walk() {
 	final int[] count = new int[1];
 	final long[] size = new long[1];
