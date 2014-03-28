@@ -14,7 +14,7 @@ clean::
 	rm -rf testdata/mockbuntu
 
 java: bin external
-	find src -type f -print0 \
+	find src -type f -name '*.java' -print0 \
 	    | xargs -0 ./javatool javac -g -deprecation -d bin
 
 bin:
