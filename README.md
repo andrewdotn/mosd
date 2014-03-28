@@ -3,27 +3,44 @@
 
 This code was developed as part of my [master’s thesis][msc]. It can parse
 the filenames out of the 100+GB of source code for all the packages in
-Ubuntu, and stuff them all into a 64MB cache file in only 2.5 minutes.
+Ubuntu, and stuff them all into a 64MB cache file, in only 2.5 minutes.
 
 [msc]: http://andrew.neitsch.ca/msc
 
 Disclaimer: This is really hacked-together, undocumented, uncommented code.
-I apologize and am working to clean it up.
+I was focusing on doing research, not developing reusable software. I
+apologize for this and am working to clean it up.
 
 I’m happy to answer any questions or provide any help: andrew@neitsch.ca
 
 ## Installation
 
- 1. Install the xz package
+Currently this requires Java 8 on Mac OS X, but with some JNI Makefile
+fiddling it can certainly run on Linux.
+
+ 1. Install the xz package using homebrew
  2. Run `make test`
+
+## Downloading Ubuntu data
+
+ 1. Run
+
+        wget --force-directories --no-host-directories \
+            http://old-releases.ubuntu.com/ubuntu/dists/karmic/{Release,{main,multiverse,restricted,universe}/{source/Sources.gz,debian-installer/binary-amd64/Packages.gz,binary-amd64/Packages.gz}}
+
+    to get the release metadata for Ubuntu Karmic Koala.
+
+ 2. Run
+
+        ./run DetailedStuffDownloader > download-all.sh \
+            && bash download-all.sh
+
+    to download the source code for all packages in Ubuntu, about 29GB.
 
 ## Creating the cache
 
- 1. Create a symlink named `ubuntu` pointing at a folder containing a
-    download of the Ubuntu archive. There should be `ubuntu/dists` and
-    `ubuntu/pool` directories.
- 2. Run `./run Main -w` to parse all the file names from all the source
-    packages into a cache file.
+Run `./run Main -w` to parse all the file names from all the source
+packages into a cache file.
 
 ## Running
 
