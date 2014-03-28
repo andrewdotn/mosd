@@ -1,7 +1,10 @@
 package net.subjoin.mosd;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -10,7 +13,8 @@ public class DetailedStuffDownloader {
     public static void main(String[] args)
     throws Exception
     {
-	UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
+	UbuntuDistribution ub = new UbuntuDistribution("ubuntu", "karmic");
+        List<String> allPkgs = new ArrayList<String>();
 	
 	Map<String, DebianControlFile> db = Maps.newHashMap();
 	for (DistributionFile df: ub.getSourcePackageMetadataFiles()) {
@@ -20,32 +24,34 @@ public class DetailedStuffDownloader {
 		DebianControlFile dsc = it.next();
 		String pkg = dsc.getKey("Package");
 		db.put(pkg, dsc);
+                allPkgs.add(pkg);
 	    }
 	}
-	
-	for (String pkg: args) {
-	    System.out.println("cd " + pkg);
-	    DebianControlFile dsc = db.get(pkg);
-	    String[] binaries = dsc.getKey("Binary").split(", ");
-	    for (String binary: binaries) {
-		System.out.println("apt-cache show " + binary
-			+ " > " + binary + ".package");
-	    }
-	    
-	    for (DistributionFile df: dsc.getFiles()) {
-		System.out.println("wget http://ca.archive.ubuntu.com/ubuntu/"
-		    + df.getPath());
 
-		if (!df.getPath().endsWith(".dsc") && !df.getPath().endsWith(".diff.gz")) {
-		    df.scanIfArchive();
-		    for (DistributionFile df2: df.getContainedFiles()) {
-			if (df2.containsOtherFiles())
-			    System.out.println("# " + df2.getPath());
-		    }
-		}
+        List<String> pkgs;
+        if (args.length > 0) {
+            pkgs = Arrays.asList(args);
+        } else {
+            pkgs = allPkgs;
+        }
+
+        System.out.println("set -e");
+
+	for (String pkg: pkgs) {
+	    DebianControlFile dsc = db.get(pkg);
+	    for (DistributionFile df: dsc.getFiles()) {
+		if (df.getPath().endsWith(".dsc")
+                        || df.getPath().endsWith(".diff.gz")) {
+                    continue;
+                }
+		System.out.println(
+                    "wget --no-host-directories --force-directories"
+                    + " --cut-dirs=1"
+                    // Most mirrors no longer have all the .orig.tar.gz
+                    // files from karmic. In early 2014, this one did.
+                    + " http://ftp.cn.debian.org/ubuntu-old-releases/ubuntu/"
+		    + df.getPath());
 	    }
-	    
-	    System.out.println("cd ..");
 	}
     }
 }

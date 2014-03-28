@@ -101,7 +101,7 @@ public class Main {
 	    if (jsap.messagePrinted())
 		System.exit(1);
 	    
-	    UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
+	    UbuntuDistribution ub = new UbuntuDistribution("ubuntu", "karmic");
 
 	    Map<String, SourcePackage> cache = ImmutableMap.of();
 	    File cacheFile = new File("tasty.cache.gz");

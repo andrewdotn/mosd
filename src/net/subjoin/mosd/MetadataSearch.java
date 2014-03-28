@@ -13,7 +13,7 @@ public class MetadataSearch {
     public static void main(String[] args)
     throws Exception
     {
-	UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
+	UbuntuDistribution ub = new UbuntuDistribution("ubuntu", "karmic");
 	
 	Set<String> matchedPackages = Sets.newHashSet();
 	

@@ -23,7 +23,7 @@ public class ReloaderDriver {
     throws IOException
     {
 	long timestamp = System.currentTimeMillis();
-	UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
+	UbuntuDistribution ub = new UbuntuDistribution("ubuntu", "karmic");
 	Map<String, SourcePackage> sp
 		// = null;
 		= Main.loadCache("tasty.cache.gz");

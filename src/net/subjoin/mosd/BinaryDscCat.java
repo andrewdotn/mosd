@@ -7,7 +7,7 @@ public class BinaryDscCat {
     public static void main(String[] args)
     throws Exception
     {
-	UbuntuDistribution ub = new UbuntuDistribution("../ubuntu", "karmic");
+	UbuntuDistribution ub = new UbuntuDistribution("ubuntu", "karmic");
 	
 	for (DistributionFile df: ub.getBinaryPackageMetadataFiles()) {
 	    Iterator<DebianControlFile> it = new DebianControlFileParser(
